@@ -115,7 +115,7 @@ async function main() {
     const mem = solver.estimateMemory();
     const compression = mem.uncompressed > 3.5e9; // only if it would not fit in wasm32 memory
     solver.allocate(compression);
-    const budgetMs = 38_000 - (performance.now() - t0);
+    const budgetMs = 34_000 - (performance.now() - t0);
     const res = await solver.solve({ timeLimitMs: budgetMs, checkEvery: 1_000_000 });
     const root = solver.getNodeStrategy();
     const elapsed = (performance.now() - t0) / 1000;

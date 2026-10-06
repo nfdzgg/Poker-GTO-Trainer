@@ -39,6 +39,7 @@ Build notes for the Poker GTO Trainer (see `SPEC.md`-derived requirements in `sc
 - Memory: the worker estimates memory whenever the configuration changes (debounced). Uncompressed is used if it fits under the limit (1.5 GB desktop, 600 MB when the viewport is < 600px wide), otherwise compression is enabled automatically; if even the compressed size is above the limit the Solve button is disabled with advice. Trees postflop-solver refuses to build ("Too many nodes") show the same advice.
 - Cancelling a solve still finalizes the partial solve so its (approximate) strategy can be browsed; the UI labels it as approximate.
 - The jsdom component tests drive the analyzer through an in-process stand-in for the worker that runs the real worker code and the real WASM; main-thread responsiveness with a real `Worker` is measured in Playwright (≈60 animation frames/s and ≈100 timer ticks/s during a flop solve).
+- `check:dist` treats as "initial JS" the scripts referenced by `dist/index.html` plus their static imports, gzips them at level 9 and compares against the 350 kB budget; it fails if the WASM file name appears in that initial set (the WASM is only referenced from the worker chunk, which is created by the lazily loaded analyzer screen). The preflop range JSON is part of the initial bundle (≈91 kB gzipped total).
 - Motion durations are defined once as CSS custom properties in `src/styles/tokens.css`; JS reads them at runtime with `getComputedStyle` (fallback constants exist only for jsdom, where stylesheets are not computed).
 
 ## Test changes
@@ -47,7 +48,7 @@ Build notes for the Poker GTO Trainer (see `SPEC.md`-derived requirements in `sc
 
 ## Known limitations
 
-- Single-threaded WASM is slow on wide flop trees: the P2-ENG-04 sample flop (full BTN open vs BB flat ranges) completes ~13 iterations in a ~38 s budget and reaches only ~40% of pot exploitability; turn and river spots converge to <1% in seconds. The analyzer's built-in flop example therefore uses narrower (3-bet pot) ranges.
+- Single-threaded WASM is slow on wide flop trees: the P2-ENG-04 sample flop (full BTN open vs BB flat ranges) completes ~11–13 iterations in a ~34–38 s iteration budget (≈40 s wall clock including allocation, exploitability and finalize) and reaches only ~40–48% of pot exploitability; turn and river spots converge to <1% in seconds. The analyzer's built-in flop example therefore uses narrower (3-bet pot) ranges.
 
 ## Milestone log
 
@@ -86,3 +87,9 @@ postflop-solver@9d1509f built single-threaded to a 268 kB SIMD WASM (committed),
 Spot builder (seats, pot, stack, range text + 13×13 grid with weight slider + Phase 1 presets, click-to-pick board with duplicate prevention, sizes per street/player, all-in), validation, worker memory estimate with 1.5 GB / 600 MB limits and auto-compression, worker solve with progress bar/iterations/exploitability/elapsed/cancel, results (action frequencies, range EV/equity, strategy grid, per-combo table, recommended play), tree navigation with card dealing and breadcrumb, persistence, three examples. E2E-04 and the real-worker responsiveness test pass.
 
 `VERIFY SUMMARY: required 41/43, stretch 0/2, skipped 0`
+
+### M6 — 2026-10-06 — polish, bundle budget, README, deploy workflow, full verify
+
+README with all required sections (study-only statement, approximation disclaimer, dev commands, WASM rebuild, credits/licenses, assets, Pages deploy, AGPL), `check:dist` (relative URLs, WASM present and lazy, no absolute-URL network calls, initial JS 90.8 kB gz of 350 kB, dist 780 kB), Pages workflow check, memory label precision, more headroom on the 60 s flop check. Every required ID passes.
+
+`VERIFY SUMMARY: required 43/43, stretch 0/2, skipped 0`
