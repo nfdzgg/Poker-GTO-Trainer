@@ -1,0 +1,37 @@
+/* tslint:disable */
+/* eslint-disable */
+export const memory: WebAssembly.Memory;
+export const __wbg_solver_free: (a: number, b: number) => void;
+export const solver_actions: (a: number) => [number, number];
+export const solver_allocate: (a: number, b: number) => void;
+export const solver_apply_history: (a: number, b: number, c: number) => void;
+export const solver_back_to_root: (a: number) => void;
+export const solver_cache_normalized_weights: (a: number) => void;
+export const solver_configure: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number, o: number, p: number, q: number, r: number, s: number, t: number, u: number, v: number, w: number, x: number, y: number, z: number, a1: number, b1: number, c1: number, d1: number, e1: number, f1: number, g1: number, h1: number, i1: number, j1: number) => [number, number];
+export const solver_current_board: (a: number) => [number, number];
+export const solver_effective_stack: (a: number) => number;
+export const solver_equity: (a: number, b: number) => [number, number];
+export const solver_expected_values: (a: number, b: number) => [number, number];
+export const solver_expected_values_detail: (a: number, b: number) => [number, number];
+export const solver_exploitability: (a: number) => number;
+export const solver_finalize: (a: number) => void;
+export const solver_history: (a: number) => [number, number];
+export const solver_iteration: (a: number) => number;
+export const solver_memory_usage: (a: number) => [number, number];
+export const solver_new: () => number;
+export const solver_node_type: (a: number) => [number, number];
+export const solver_normalized_weights: (a: number, b: number) => [number, number];
+export const solver_play: (a: number, b: number) => void;
+export const solver_possible_cards: (a: number) => [number, number];
+export const solver_private_cards: (a: number, b: number) => [number, number];
+export const solver_solve_step: (a: number) => void;
+export const solver_starting_pot: (a: number) => number;
+export const solver_strategy: (a: number) => [number, number];
+export const solver_total_bet_amount: (a: number) => [number, number];
+export const solver_weights: (a: number, b: number) => [number, number];
+export const upstream_commit: () => [number, number];
+export const __wbindgen_externrefs: WebAssembly.Table;
+export const __wbindgen_free: (a: number, b: number, c: number) => void;
+export const __wbindgen_malloc: (a: number, b: number) => number;
+export const __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
+export const __wbindgen_start: () => void;

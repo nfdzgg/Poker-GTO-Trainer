@@ -1,0 +1,10 @@
+node_modules/
+dist/
+artifacts/
+test-results/
+playwright-report/
+coverage/
+*.log
+solver-wasm/target/
+
+.DS_Store

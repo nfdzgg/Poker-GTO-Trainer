@@ -1,0 +1,111 @@
+/*
+ * Design tokens. This is the ONLY file allowed to contain literal hex colors
+ * (enforced by `npm run check:assets`, requirement UI-01).
+ */
+:root {
+  /* Felt and surfaces */
+  --felt-950: #061a17;
+  --felt-900: #0a2622;
+  --felt-800: #0e322d;
+  --felt-700: #134039;
+  --felt-600: #1a5047;
+  --felt-500: #236457;
+  --surface-1: #0d2723;
+  --surface-2: #123430;
+  --surface-3: #18413b;
+  --surface-glass: #0d2723e6;
+  --line: #2a564e;
+  --line-strong: #3d7166;
+  --shadow-color: #00000080;
+  --vignette: #000000a6;
+
+  /* Text */
+  --text-strong: #f4f1e8;
+  --text: #e3ede8;
+  --text-muted: #a8c2ba;
+  --text-faint: #7f9e95;
+  --text-on-accent: #1b1305;
+  --text-on-card: #1d2230;
+
+  /* Accent (restrained warm brass) */
+  --accent: #e2b25c;
+  --accent-strong: #f0c675;
+  --accent-soft: #e2b25c33;
+
+  /* Action colors: raise family red, call green, fold blue-grey */
+  --act-raise: #e2565c;
+  --act-3bet: #c93f52;
+  --act-4bet: #a02c47;
+  --act-allin: #7d1f3f;
+  --act-bet: #e2565c;
+  --act-call: #3cb27a;
+  --act-check: #4f9f8c;
+  --act-fold: #5f7889;
+
+  /* Grades */
+  --grade-best: #4cc38a;
+  --grade-ok: #e2b25c;
+  --grade-mistake: #ef6b6b;
+
+  /* Cards and chips */
+  --card-face: #fbf8f0;
+  --card-edge: #d8d2c3;
+  --card-back: #7a2f3c;
+  --card-back-pattern: #9c4352;
+  --suit-spade: #1d2230;
+  --suit-heart: #c8323c;
+  --suit-diamond: #c8323c;
+  --suit-club: #1d2230;
+  --suit4-diamond: #2563c9;
+  --suit4-club: #17733a;
+  --chip-1: #f2efe6;
+  --chip-5: #c8323c;
+  --chip-25: #1f8a47;
+  --chip-100: #1d2230;
+  --chip-stripe: #fbf8f0;
+
+  /* Focus */
+  --focus-ring: #8fd3ff;
+
+  /* Spacing scale (4px base) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  /* Type */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.875rem;
+  --fs-md: 1rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: 1.6rem;
+  --fs-2xl: 2.2rem;
+
+  /* Motion */
+  --dur-fast: 140ms;
+  --dur-med: 260ms;
+  --dur-slow: 420ms;
+  --dur-deal: 380ms;
+  --dur-flip: 420ms;
+  --dur-chip: 520ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+
+  /* Layout */
+  --tap-min: 44px;
+  --content-max: 1120px;
+}
