@@ -38,7 +38,7 @@ describe('design tokens', () => {
       for (const m of text.matchAll(/#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})\b/g)) offenders.push(`${path.relative(src, f)} ${m[0]}`);
     }
     expect(offenders).toEqual([]);
-    for (const css of ['global.css', 'app.css', 'components.css']) {
+    for (const css of ['global.css', 'app.css', 'components.css', 'analyzer.css']) {
       const text = readFileSync(path.join(dir, css), 'utf8');
       expect((text.match(/var\(--/g) ?? []).length, css).toBeGreaterThan(10);
     }

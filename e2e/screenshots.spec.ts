@@ -12,6 +12,12 @@ test('E2E-05 screenshots of every screen at both viewports', async ({ page }) =>
     await page.setViewportSize({ width: vp.width, height: vp.height });
     for (const s of SCREENS) {
       await gotoScreen(page, s.hash);
+      if (s.name === 'analyzer') {
+        await page.getByTestId('example-river').click();
+        await page.getByTestId('solve').click();
+        await page.getByTestId('node-player').waitFor({ timeout: 60_000 });
+        await page.getByTestId('results').locator('.range-cell[data-hand="AQs"]').click();
+      }
       if (s.name === 'drill') {
         await page.getByRole('group', { name: 'Your action' }).getByRole('button').first().click();
         await page.waitForTimeout(700);

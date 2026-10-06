@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const css = ['global.css', 'app.css', 'components.css'].map((f) => readFileSync(path.join(__dirname, f), 'utf8')).join('\n');
+const css = ['global.css', 'app.css', 'components.css', 'analyzer.css'].map((f) => readFileSync(path.join(__dirname, f), 'utf8')).join('\n');
 
 describe('motion CSS', () => {
   it('UI-02 keyframes and transitions animate only transform and opacity', () => {

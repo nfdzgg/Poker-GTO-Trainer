@@ -1,0 +1,308 @@
+/* ---------- Postflop analyzer ---------- */
+.examples {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+.example-name {
+  margin: 0;
+  flex: 1 1 200px;
+}
+.analyzer-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+.builder {
+  display: grid;
+  gap: var(--space-4);
+}
+.builder-fields {
+  display: grid;
+  gap: var(--space-4);
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.builder fieldset {
+  min-width: 0;
+}
+.range-editor,
+.board-picker,
+.sizes-editor {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  display: grid;
+  gap: var(--space-2);
+}
+.builder legend {
+  font-weight: 700;
+  color: var(--text-strong);
+  padding: 0 var(--space-1);
+}
+.field textarea {
+  min-height: 72px;
+  resize: vertical;
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+}
+.field input[type='range'] {
+  min-height: var(--tap-min);
+  padding: 0;
+  background: transparent;
+  border: 0;
+  accent-color: var(--accent);
+}
+.range-editor-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+.grow {
+  flex: 1 1 200px;
+}
+.range-editor-grid {
+  display: grid;
+  gap: var(--space-2);
+}
+.seats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-3);
+}
+.error-text {
+  color: var(--grade-mistake);
+}
+.validation {
+  margin: 0;
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-6);
+  border: 1px solid var(--grade-mistake);
+  border-radius: var(--radius-md);
+  color: var(--grade-mistake);
+  font-size: var(--fs-sm);
+}
+.board-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  min-height: 66px;
+  align-items: center;
+}
+.card-picker,
+.deal-picker {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(4, auto);
+  grid-template-columns: repeat(13, minmax(0, 1fr));
+  gap: 3px;
+}
+.card-picker-rank {
+  display: contents;
+}
+.pick-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-height: var(--tap-min);
+  min-width: 0;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--card-edge);
+  background: var(--card-face);
+  font-weight: 800;
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+.pick-card.on {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+  transform: translateY(-2px);
+}
+.pick-card:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.pick-rank {
+  color: var(--text-on-card);
+}
+.sizes-street h4 {
+  margin: var(--space-2) 0 var(--space-1);
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.sizes-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+.solve-box {
+  display: grid;
+  gap: var(--space-3);
+}
+.memory {
+  margin: 0;
+  font-size: var(--fs-sm);
+}
+.solve-btn {
+  font-size: var(--fs-lg);
+}
+.solve-progress {
+  display: grid;
+  gap: var(--space-2);
+}
+.solve-progress-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.progress-track {
+  height: 12px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  width: 100%;
+  background: var(--accent);
+  transform-origin: left center;
+  transition: transform var(--dur-med) var(--ease-out);
+}
+.solve-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: 0;
+  font-size: var(--fs-sm);
+}
+.solve-stats dt {
+  color: var(--text-muted);
+}
+.solve-stats dd {
+  margin: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.results {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.results h2 {
+  margin: 0;
+}
+.breadcrumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.breadcrumb li + li::before {
+  content: '›';
+  color: var(--text-faint);
+  margin-right: var(--space-1);
+}
+.breadcrumb li {
+  display: inline-flex;
+  align-items: center;
+}
+.crumb {
+  min-height: var(--tap-min);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-strong);
+  background: var(--surface-2);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+}
+.crumb.current {
+  display: inline-flex;
+  align-items: center;
+  border-color: var(--accent);
+  color: var(--text-strong);
+  font-weight: 700;
+}
+.node-board {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.node-pot {
+  margin-left: var(--space-2);
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+.node-head h3 {
+  margin-bottom: var(--space-1);
+}
+.node-head p {
+  margin: 0;
+}
+.node-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.node-action strong {
+  margin-left: var(--space-1);
+}
+.results-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+.hand-detail h3 {
+  font-size: var(--fs-lg);
+}
+.recommended {
+  margin: var(--space-2) 0;
+}
+.combo-label {
+  display: inline-flex;
+  gap: 2px;
+  font-weight: 800;
+  background: var(--card-face);
+  border-radius: 4px;
+  padding: 0 4px;
+}
+.combo-table td,
+.combo-table th {
+  white-space: nowrap;
+}
+.results-empty {
+  min-height: 200px;
+}
+
+@media (max-width: 1100px) {
+  .analyzer-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 720px) {
+  .card-picker,
+  .deal-picker {
+    grid-auto-flow: row;
+    grid-template-rows: none;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .sizes-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

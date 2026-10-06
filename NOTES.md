@@ -34,11 +34,16 @@ Build notes for the Poker GTO Trainer (see `SPEC.md`-derived requirements in `sc
 - P2-ENG-04's sample flop spot uses **all-in as its one raise size** on every street. With a 3x raise the tree needs 7.3 GB (3.7 GB compressed), beyond wasm32's 4 GB address space and its 2 GB single-allocation limit; with all-in raises it needs 1.59 GB (0.81 GB compressed). The Node check solves it uncompressed (faster per iteration) and the analyzer compresses automatically when the uncompressed size exceeds the device limit.
 - Exploitability is reported as a percentage of the starting pot (postflop-solver's exploitability in chips ÷ starting pot).
 - The solver runs in a module Web Worker (`src/solver/worker.ts`) whose message handling lives in `workerCore.ts` so it can be unit-tested in Node; solves run in ~30ms slices and yield to the worker's event loop so a `cancel` message is picked up promptly.
+- Analyzer: the form state (seats, ranges as text, board text, pot, stack, per-street/per-player bet and raise sizes as % of pot, all-in toggle, target, max iterations) is the single source of truth, validated by `validateForm` and saved to `pgt.analyzer.v1` on every change. The range grid and Phase 1 presets write back into the range text (canonical `formatRange`), so text and grid can never disagree.
+- The all-in checkbox adds all-in to every bet and raise list. Bet/raise sizes are only required for streets that are played given the board length (and a street with no sizes but all-in on is valid).
+- Memory: the worker estimates memory whenever the configuration changes (debounced). Uncompressed is used if it fits under the limit (1.5 GB desktop, 600 MB when the viewport is < 600px wide), otherwise compression is enabled automatically; if even the compressed size is above the limit the Solve button is disabled with advice. Trees postflop-solver refuses to build ("Too many nodes") show the same advice.
+- Cancelling a solve still finalizes the partial solve so its (approximate) strategy can be browsed; the UI labels it as approximate.
+- The jsdom component tests drive the analyzer through an in-process stand-in for the worker that runs the real worker code and the real WASM; main-thread responsiveness with a real `Worker` is measured in Playwright (≈60 animation frames/s and ≈100 timer ticks/s during a flop solve).
 - Motion durations are defined once as CSS custom properties in `src/styles/tokens.css`; JS reads them at runtime with `getComputedStyle` (fallback constants exist only for jsdom, where stylesheets are not computed).
 
 ## Test changes
 
-- None so far.
+- `src/styles/tokens.test.ts` and `src/styles/motion.test.ts`: the list of stylesheets they scan was extended to include the new `analyzer.css` (coverage widened, nothing loosened).
 
 ## Known limitations
 
@@ -75,3 +80,9 @@ Original SVG cards/chips, card fan on Home, animation phases with reduced-motion
 postflop-solver@9d1509f built single-threaded to a 268 kB SIMD WASM (committed), typed `PostflopSolver` API (configure/estimateMemory/allocate/solveStep/solve/cancel/finalize/getNode/getNodeStrategy/getHandEV/play/dealCard/back), worker + client. check:solver: toy river IP calls 50.2% and value:bluff 2.00:1; turn spot 0.475% of pot in 140 iterations (3.5 s); flop spot root strategy in 44.5 s wall clock.
 
 `VERIFY SUMMARY: required 33/43, stretch 0/2, skipped 0`
+
+### M5 — 2026-10-06 — postflop analyzer UI
+
+Spot builder (seats, pot, stack, range text + 13×13 grid with weight slider + Phase 1 presets, click-to-pick board with duplicate prevention, sizes per street/player, all-in), validation, worker memory estimate with 1.5 GB / 600 MB limits and auto-compression, worker solve with progress bar/iterations/exploitability/elapsed/cancel, results (action frequencies, range EV/equity, strategy grid, per-combo table, recommended play), tree navigation with card dealing and breadcrumb, persistence, three examples. E2E-04 and the real-worker responsiveness test pass.
+
+`VERIFY SUMMARY: required 41/43, stretch 0/2, skipped 0`
