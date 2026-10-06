@@ -1,0 +1,55 @@
+// Single list of every requirement ID in SPEC.md, with the evidence sources
+// that must report a pass for the ID to pass.
+//   vitest        -> a Vitest test whose name contains the ID
+//   e2e           -> a Playwright test whose name contains the ID
+//   check:<name>  -> the check script reported PASS for the ID
+//   step:<name>   -> the verify step exited with code 0
+export const REQUIREMENTS = [
+  { id: 'P1-DATA-01', desc: 'All 35 preflop spot files exist and parse; all 6 positions appear as hero', sources: ['check:data', 'vitest'] },
+  { id: 'P1-DATA-02', desc: 'Every spot has 169 hand classes with frequencies in [0,1] summing to 1', sources: ['check:data', 'vitest'] },
+  { id: 'P1-DATA-03', desc: 'Range sanity invariants (AA, 72o, RFI bands, 3-bet AA >= 22)', sources: ['check:data', 'vitest'] },
+  { id: 'P1-DATA-04', desc: 'Combo weighting: pairs 6, suited 4, offsuit 12, total 1326', sources: ['vitest'] },
+  { id: 'P1-DRILL-01', desc: 'Drill deals random spot and hand with working filters and seedable RNG', sources: ['vitest'] },
+  { id: 'P1-DRILL-02', desc: 'Grading: Best / Acceptable mix / Mistake including ties', sources: ['vitest'] },
+  { id: 'P1-DRILL-03', desc: 'Explanations for every spot x hand x action name position and frequencies', sources: ['vitest'] },
+  { id: 'P1-DRILL-04', desc: 'Drill answer shows grade, explanation, frequency bar and range button', sources: ['vitest'] },
+  { id: 'P1-VIEW-01', desc: '13x13 range grid with 169 labelled cells for any spot via selectors', sources: ['vitest'] },
+  { id: 'P1-VIEW-02', desc: 'Cells show proportional action bands, legend and range percentages', sources: ['vitest'] },
+  { id: 'P1-VIEW-03', desc: 'Cell hover/tap shows frequencies and combos; keyboard focus and ARIA labels', sources: ['vitest'] },
+  { id: 'P1-STAT-01', desc: 'Drill answers persist in versioned localStorage; corrupt data falls back', sources: ['vitest'] },
+  { id: 'P1-STAT-02', desc: 'Stats by position, spot type, position x spot type and total hands', sources: ['vitest'] },
+  { id: 'P1-STAT-03', desc: 'Biggest leaks: 3 lowest buckets with >=10 attempts, drill links, empty state', sources: ['vitest'] },
+  { id: 'P1-STAT-04', desc: 'Reset button clears stats after confirmation', sources: ['vitest'] },
+  { id: 'P2-ENG-01', desc: 'postflop-solver built to single-threaded WASM, artifacts committed, commit pinned', sources: ['check:solver'] },
+  { id: 'P2-ENG-02', desc: 'Toy river spot matches known equilibrium (IP calls 50%, OOP bets 2:1)', sources: ['check:solver'] },
+  { id: 'P2-ENG-03', desc: 'Turn spot converges below 1% of pot exploitability', sources: ['check:solver'] },
+  { id: 'P2-ENG-04', desc: 'Sample flop spot returns a full root strategy in under 60 s', sources: ['check:solver'] },
+  { id: 'P2-ENG-05', desc: 'Typed TypeScript solver API unit-tested against the WASM in Node', sources: ['vitest'] },
+  { id: 'P2-UI-01', desc: 'Spot builder: seats, stack, pot, ranges (text + grid + presets), board, sizes', sources: ['vitest'] },
+  { id: 'P2-UI-02', desc: 'Validation blocks impossible inputs with clear messages', sources: ['vitest'] },
+  { id: 'P2-UI-03', desc: 'Estimated memory shown; solves above the safe limit are blocked', sources: ['vitest'] },
+  { id: 'P2-UI-04', desc: 'Solve runs in a Web Worker with progress, cancel and a responsive main thread', sources: ['vitest', 'e2e'] },
+  { id: 'P2-UI-05', desc: 'Results: action frequencies, EV, 13x13 grid, per-hand detail, recommended play', sources: ['vitest'] },
+  { id: 'P2-UI-06', desc: 'Tree navigation: actions, turn/river card selection, breadcrumb', sources: ['vitest'] },
+  { id: 'P2-UI-07', desc: 'Spot config persisted; three built-in examples load with one click', sources: ['vitest'] },
+  { id: 'P2-DRILL-01', desc: 'Postflop drill graded against solver frequencies with EV loss', sources: ['vitest'], stretch: true },
+  { id: 'P2-DRILL-02', desc: 'Postflop drill results recorded under a separate Postflop stats section', sources: ['vitest'], stretch: true },
+  { id: 'UI-01', desc: 'Design tokens defined once; no hard-coded hex colors outside the token file', sources: ['check:assets', 'vitest'] },
+  { id: 'UI-02', desc: 'Deal, flip, chip, grade and screen animations progress in order (transform/opacity only)', sources: ['check:assets', 'vitest'] },
+  { id: 'UI-03', desc: 'prefers-reduced-motion disables non-essential motion', sources: ['vitest'] },
+  { id: 'UI-04', desc: 'Original SVG cards and chips; 52-card snapshot; four-color deck option', sources: ['vitest'] },
+  { id: 'UI-05', desc: 'Every public/assets file is listed in ASSETS.md with an allowed license', sources: ['check:assets'] },
+  { id: 'UI-06', desc: 'Keyboard access, visible focus, 4.5:1 text contrast, 44px tap targets on phone', sources: ['vitest', 'e2e'] },
+  { id: 'E2E-01', desc: 'Built app loads from a sub-path; every screen renders without console or network errors', sources: ['e2e'], e2e: true },
+  { id: 'E2E-02', desc: 'No horizontal scroll at 390x844 and 1280x800; grid fully visible on phone', sources: ['e2e'], e2e: true },
+  { id: 'E2E-03', desc: 'Preflop flow: 5 drill hands survive a reload in stats', sources: ['e2e'], e2e: true },
+  { id: 'E2E-04', desc: 'Postflop flow: river example solves, results grid, navigate one action', sources: ['e2e'], e2e: true },
+  { id: 'E2E-05', desc: 'Screenshots of every screen at both viewports written and listed', sources: ['e2e'], e2e: true },
+  { id: 'BUILD-01', desc: 'Build succeeds with zero TypeScript and ESLint errors', sources: ['step:lint', 'step:typecheck', 'step:build'] },
+  { id: 'BUILD-02', desc: 'dist uses relative URLs, contains the WASM, no absolute-URL network calls, JS budget', sources: ['check:dist'] },
+  { id: 'DOC-01', desc: 'README covers all required sections', sources: ['check:assets'] },
+  { id: 'DOC-02', desc: 'NOTES.md has all required sections and milestone log entries', sources: ['check:assets'] },
+  { id: 'DEPLOY-01', desc: 'GitHub Pages deploy workflow parses and has the required steps', sources: ['check:assets'] },
+];
+
+export const ID_PATTERN = /\b(?:P[12]-[A-Z]+-\d{2}|UI-\d{2}|E2E-\d{2}|BUILD-\d{2}|DOC-\d{2}|DEPLOY-\d{2})\b/g;
