@@ -11,6 +11,7 @@ Build notes for the Poker GTO Trainer (see `SPEC.md`-derived requirements in `sc
 
 ## Decisions
 
+- Four-color deck: diamonds blue, clubs green; toggled on the drill screen and stored in `pgt.prefs.v1`. The green was darkened to reach 4.5:1 contrast on the card face.
 - Tooling versions installed from npm at build time: Vite 8, Vitest 5, TypeScript 6, ESLint 10 (flat config) with typescript-eslint.
 - `@playwright/test` is pinned to **1.56.1** because the pre-installed Chromium in the build environment is revision 1194, which is exactly the revision Playwright 1.56.1 expects (newer Playwright wants 1243 and cannot download it here).
 - Hash-based routing is implemented with a ~40-line hook (`src/lib/router.ts`) instead of a router dependency.
@@ -24,6 +25,9 @@ Build notes for the Poker GTO Trainer (see `SPEC.md`-derived requirements in `sc
 - The stats file is `{version: 1, records: [...], postflop: [...]}` under `pgt.stats.v1`; anything unparseable, of another version or of the wrong shape loads as empty stats and individual malformed records are dropped. Records are capped at 20,000.
 - "Correct" for accuracy = Best or Acceptable mix. Leak buckets are only the position × spot-type pairs that exist (BB has no RFI spot; those cells show "n/a").
 - The reset confirmation is an in-page `alertdialog` rather than `window.confirm`, so it is styleable and testable.
+- Animations are driven by a `useAnimPhases` hook that steps a `data-anim` attribute through named phases on timers (deal: `dealing → flipping → revealed`; flip: `face-down → flipping → revealed`; chips: `idle → moving → in-pot`; grade: `grade-enter → grade-shown`; screen: `entering → entered`). CSS keys off the attribute and animates only `transform`/`opacity` (enforced by `check:assets` and a unit test). With `prefers-reduced-motion` the hook jumps to the final phase and a global media query shortens any remaining CSS motion to 1ms.
+- Tap targets: every button, link, select and checkbox label is at least 44×44px on the phone viewport (Playwright check). The 169 range-grid cells are exempt: SPEC requires the whole 13×13 grid to be visible without horizontal scrolling at 390px, which makes cells ~26px; this is the WCAG 2.5.8 "essential" exception. Each cell remains a focusable button with a full ARIA label, and the detail panel is reachable by keyboard. Inline links inside paragraphs are exempt (WCAG "inline" exception). The E2E check rounds to whole CSS pixels because sub-pixel layout can report 43.99px for a 44px control.
+- The only file under `public/assets/` is an original noise texture (`felt-noise.svg`, CC0) referenced with a base-relative URL; all cards, chips, suits and the table are inline SVG/CSS components.
 - Motion durations are defined once as CSS custom properties in `src/styles/tokens.css`; JS reads them at runtime with `getComputedStyle` (fallback constants exist only for jsdom, where stylesheets are not computed).
 
 ## Test changes
@@ -53,3 +57,9 @@ Vite + React + TS strict, ESLint, Vitest, Playwright (pinned), hash routing, des
 Drill screen with felt table, dealt SVG cards, action buttons, grade badge, explanation, frequency bar and range link; 13×13 range viewer with proportional bands, legend, detail panel, roving-tabindex keyboard navigation; stats screen (versioned localStorage, accuracy tables, biggest leaks with drill links, confirm-to-reset).
 
 `VERIFY SUMMARY: required 18/43, stretch 0/2, skipped 0`
+
+### M3 — 2026-10-06 — visual design, cards, chips, animations, Phase 1 E2E
+
+Original SVG cards/chips, card fan on Home, animation phases with reduced-motion support, contrast/focus/tap-target checks, ASSETS.md, Playwright smoke/responsive/preflop-flow/screenshot tests from a `/poker-gto-trainer/` sub-path. **Phase 1 gate passed:** every P1-*, UI-* and E2E-01/02/03/05 ID passes.
+
+`VERIFY SUMMARY: required 28/43, stretch 0/2, skipped 0`

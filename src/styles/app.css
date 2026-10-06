@@ -4,6 +4,15 @@
   min-height: 100vh;
 }
 
+.felt-texture {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.09;
+  background-repeat: repeat;
+}
+
 .skip-link {
   position: absolute;
   left: var(--space-3);
@@ -124,6 +133,33 @@
 }
 
 /* Home */
+.hero-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-5);
+}
+.hero-art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 220px;
+}
+.card-fan {
+  display: flex;
+  justify-content: center;
+}
+.fan-slot {
+  margin: 0 -18px;
+  transform-origin: 50% 120%;
+}
+.hero-chips {
+  position: absolute;
+  bottom: 0;
+  right: 12%;
+  display: flex;
+  gap: var(--space-2);
+}
 .hero {
   padding: var(--space-6) 0 var(--space-7);
   max-width: 760px;
@@ -184,7 +220,18 @@
     padding: var(--space-4) var(--space-3) var(--space-6);
   }
   .hero {
-    padding: var(--space-3) 0 var(--space-5);
+    padding: var(--space-3) 0 var(--space-3);
+  }
+  .hero-wrap {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hero-art {
+    min-height: 160px;
+    margin-bottom: var(--space-5);
+  }
+  .fan-slot .playing-card {
+    width: 62px !important;
+    height: 87px !important;
   }
   h1 {
     font-size: var(--fs-xl);

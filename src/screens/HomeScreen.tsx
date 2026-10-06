@@ -1,4 +1,10 @@
+import { ChipStack } from '../components/Chip';
+import { PlayingCard } from '../components/PlayingCard';
+import { parseCard } from '../lib/poker/cards';
+import { usePrefs } from '../lib/prefs';
 import { hrefFor } from '../lib/router';
+
+const FAN = ['Ah', 'Kd', 'Qs', 'Jc', 'Th'].map((c) => parseCard(c)!);
 
 const TILES = [
   { route: 'drill', title: 'Preflop Drill', body: 'Get dealt a spot and a hand, pick an action, and get graded against the chart.' },
@@ -8,8 +14,10 @@ const TILES = [
 ] as const;
 
 export function HomeScreen() {
+  const [prefs] = usePrefs();
   return (
     <section className="home" aria-labelledby="home-title">
+      <div className="hero-wrap">
       <div className="hero">
         <p className="eyebrow">No-Limit Hold'em · 6-max · 100bb</p>
         <h1 id="home-title">Study game-theory-optimal poker, one decision at a time.</h1>
@@ -25,6 +33,20 @@ export function HomeScreen() {
             Open analyzer
           </a>
         </div>
+      </div>
+      <div className="hero-art" aria-hidden="true">
+        <div className="card-fan">
+          {FAN.map((c, i) => (
+            <div key={c} className="fan-slot" style={{ transform: `rotate(${(i - 2) * 9}deg) translateY(${Math.abs(i - 2) * 6}px)` }}>
+              <PlayingCard card={c} anim="flip" delayMs={120 * i} width={84} fourColor={prefs.fourColor} />
+            </div>
+          ))}
+        </div>
+        <div className="hero-chips">
+          <ChipStack amount={31.5} size={30} />
+          <ChipStack amount={12} size={30} />
+        </div>
+      </div>
       </div>
       <div className="tiles">
         {TILES.map((t) => (

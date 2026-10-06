@@ -51,6 +51,7 @@ export function App() {
 
   return (
     <div className="app">
+      <div className="felt-texture" aria-hidden="true" style={{ backgroundImage: `url(${import.meta.env.BASE_URL}assets/felt-noise.svg)` }} />
       <a className="skip-link" href="#main-content" onClick={(e) => { e.preventDefault(); document.getElementById('main-content')?.focus(); }}>
         Skip to content
       </a>
