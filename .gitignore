@@ -6,5 +6,5 @@ playwright-report/
 coverage/
 *.log
 solver-wasm/target/
-solver-wasm/pkg/.gitignore
+
 .DS_Store

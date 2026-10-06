@@ -28,6 +28,12 @@ Build notes for the Poker GTO Trainer (see `SPEC.md`-derived requirements in `sc
 - Animations are driven by a `useAnimPhases` hook that steps a `data-anim` attribute through named phases on timers (deal: `dealing → flipping → revealed`; flip: `face-down → flipping → revealed`; chips: `idle → moving → in-pot`; grade: `grade-enter → grade-shown`; screen: `entering → entered`). CSS keys off the attribute and animates only `transform`/`opacity` (enforced by `check:assets` and a unit test). With `prefers-reduced-motion` the hook jumps to the final phase and a global media query shortens any remaining CSS motion to 1ms.
 - Tap targets: every button, link, select and checkbox label is at least 44×44px on the phone viewport (Playwright check). The 169 range-grid cells are exempt: SPEC requires the whole 13×13 grid to be visible without horizontal scrolling at 390px, which makes cells ~26px; this is the WCAG 2.5.8 "essential" exception. Each cell remains a focusable button with a full ARIA label, and the detail panel is reachable by keyboard. Inline links inside paragraphs are exempt (WCAG "inline" exception). The E2E check rounds to whole CSS pixels because sub-pixel layout can report 43.99px for a 44px control.
 - The only file under `public/assets/` is an original noise texture (`felt-noise.svg`, CC0) referenced with a base-relative URL; all cards, chips, suits and the table are inline SVG/CSS components.
+- Solver: `solver-wasm/` wraps b-inary/postflop-solver pinned at commit `9d1509fe5077d019825f833eed04b16d342dfda1` with `default-features = false` (no rayon, no bincode/zstd), built by `wasm-pack --target web` with `+simd128` and `wasm-opt -O3`. The Rust toolchain, `wasm-pack` (installed with `cargo install`) and `wasm-opt` (`cargo install wasm-opt`, because the binaryen release download from GitHub was blocked by the sandbox) all worked, so the TypeScript fallback was **not** used. The `custom-alloc` feature was not enabled because it needs nightly Rust.
+- WASM SIMD (`+simd128`) is enabled: ~30% faster per iteration. It is supported by every current browser (Chrome/Edge 91+, Firefox 89+, Safari 16.4+) and Node.
+- The solver works in integer chips; the TS API uses 100 chips per big blind and converts every pot, bet and EV back to bb. EVs are postflop-solver's per-hand EVs: the chips a hand expects to collect from the pot from this node on, net of future bets (folding = 0).
+- P2-ENG-04's sample flop spot uses **all-in as its one raise size** on every street. With a 3x raise the tree needs 7.3 GB (3.7 GB compressed), beyond wasm32's 4 GB address space and its 2 GB single-allocation limit; with all-in raises it needs 1.59 GB (0.81 GB compressed). The Node check solves it uncompressed (faster per iteration) and the analyzer compresses automatically when the uncompressed size exceeds the device limit.
+- Exploitability is reported as a percentage of the starting pot (postflop-solver's exploitability in chips ÷ starting pot).
+- The solver runs in a module Web Worker (`src/solver/worker.ts`) whose message handling lives in `workerCore.ts` so it can be unit-tested in Node; solves run in ~30ms slices and yield to the worker's event loop so a `cancel` message is picked up promptly.
 - Motion durations are defined once as CSS custom properties in `src/styles/tokens.css`; JS reads them at runtime with `getComputedStyle` (fallback constants exist only for jsdom, where stylesheets are not computed).
 
 ## Test changes
@@ -36,7 +42,7 @@ Build notes for the Poker GTO Trainer (see `SPEC.md`-derived requirements in `sc
 
 ## Known limitations
 
-- None recorded yet.
+- Single-threaded WASM is slow on wide flop trees: the P2-ENG-04 sample flop (full BTN open vs BB flat ranges) completes ~13 iterations in a ~38 s budget and reaches only ~40% of pot exploitability; turn and river spots converge to <1% in seconds. The analyzer's built-in flop example therefore uses narrower (3-bet pot) ranges.
 
 ## Milestone log
 
@@ -63,3 +69,9 @@ Drill screen with felt table, dealt SVG cards, action buttons, grade badge, expl
 Original SVG cards/chips, card fan on Home, animation phases with reduced-motion support, contrast/focus/tap-target checks, ASSETS.md, Playwright smoke/responsive/preflop-flow/screenshot tests from a `/poker-gto-trainer/` sub-path. **Phase 1 gate passed:** every P1-*, UI-* and E2E-01/02/03/05 ID passes.
 
 `VERIFY SUMMARY: required 28/43, stretch 0/2, skipped 0`
+
+### M4 — 2026-10-06 — solver WASM, TypeScript API, Node checks, worker
+
+postflop-solver@9d1509f built single-threaded to a 268 kB SIMD WASM (committed), typed `PostflopSolver` API (configure/estimateMemory/allocate/solveStep/solve/cancel/finalize/getNode/getNodeStrategy/getHandEV/play/dealCard/back), worker + client. check:solver: toy river IP calls 50.2% and value:bluff 2.00:1; turn spot 0.475% of pot in 140 iterations (3.5 s); flop spot root strategy in 44.5 s wall clock.
+
+`VERIFY SUMMARY: required 33/43, stretch 0/2, skipped 0`

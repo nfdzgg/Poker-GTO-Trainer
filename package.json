@@ -17,7 +17,7 @@
     "check:dist": "tsx scripts/check-dist.ts",
     "e2e": "playwright test",
     "gen:preflop": "tsx scripts/gen-preflop.ts",
-    "build:wasm": "cd solver-wasm && wasm-pack build --target web --release --out-dir pkg --out-name solver",
+    "build:wasm": "cd solver-wasm && wasm-pack build --target web --release --out-dir pkg --out-name solver && rm -f pkg/.gitignore",
     "verify": "node scripts/verify.mjs"
   },
   "dependencies": {
