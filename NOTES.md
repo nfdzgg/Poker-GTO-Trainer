@@ -40,6 +40,7 @@ Build notes for the Poker GTO Trainer (see `SPEC.md`-derived requirements in `sc
 - Cancelling a solve still finalizes the partial solve so its (approximate) strategy can be browsed; the UI labels it as approximate.
 - The jsdom component tests drive the analyzer through an in-process stand-in for the worker that runs the real worker code and the real WASM; main-thread responsiveness with a real `Worker` is measured in Playwright (≈60 animation frames/s and ≈100 timer ticks/s during a flop solve).
 - `check:dist` treats as "initial JS" the scripts referenced by `dist/index.html` plus their static imports, gzips them at level 9 and compares against the 350 kB budget; it fails if the WASM file name appears in that initial set (the WASM is only referenced from the worker chunk, which is created by the lazily loaded analyzer screen). The preflop range JSON is part of the initial bundle (≈91 kB gzipped total).
+- Postflop drill (M7): a deal is a random walk from the root of the solved tree — at each decision it stops with probability 0.45 (always by 4 actions deep) or follows an action sampled by the range-wide frequencies; turn/river cards are dealt uniformly from the legal cards — then a combo is dealt weighted by the acting player's range weight at that node. Grading reuses the preflop rule (`gradeFrequencies`); EV loss = best action EV − chosen action EV for that combo (postflop-solver's per-action EVs, in bb). Results go to `stats.postflop` and a separate "Postflop" section of the stats screen; the reset button clears both. The "Drill this spot" button only appears after a solve (finalized results are needed for EVs).
 - Motion durations are defined once as CSS custom properties in `src/styles/tokens.css`; JS reads them at runtime with `getComputedStyle` (fallback constants exist only for jsdom, where stylesheets are not computed).
 
 ## Test changes
@@ -93,3 +94,9 @@ Spot builder (seats, pot, stack, range text + 13×13 grid with weight slider + P
 README with all required sections (study-only statement, approximation disclaimer, dev commands, WASM rebuild, credits/licenses, assets, Pages deploy, AGPL), `check:dist` (relative URLs, WASM present and lazy, no absolute-URL network calls, initial JS 90.8 kB gz of 350 kB, dist 780 kB), Pages workflow check, memory label precision, more headroom on the 60 s flop check. Every required ID passes.
 
 `VERIFY SUMMARY: required 43/43, stretch 0/2, skipped 0`
+
+### M7 — 2026-10-06 — postflop drill (stretch)
+
+Stretch rule: M6 finished with far more than 8 turns of budget left, so M7 was required and done. "Drill this spot" after a solve deals random hands at random decisions of the solved tree (seedable random walk, combos weighted by range), grades with the shared Best / Acceptable mix / Mistake rule against the solver's frequencies, shows per-action EV and EV loss, and records results in a separate Postflop stats section. No IDs are skipped.
+
+`VERIFY SUMMARY: required 43/43, stretch 2/2, skipped 0`

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { hrefFor } from '../lib/router';
+import { GRADE_LABELS } from '../lib/preflop/grading';
 import { POSITIONS, SPOT_TYPE_NAMES, SPOT_TYPES, ALL_SPOT_BUCKETS } from '../lib/preflop/bucket';
 import { accuracy, aggregate, biggestLeaks, bucketKey, LEAK_MIN_ATTEMPTS, type Tally } from '../lib/stats/aggregate';
 import { clearStats, loadStats, type StatsFile } from '../lib/stats/store';
@@ -146,6 +147,65 @@ export function StatsScreen() {
         </div>
       </div>
 
+      <div className="panel" data-testid="postflop-stats">
+        <h2>Postflop</h2>
+        {stats.postflop.length === 0 ? (
+          <p className="muted" data-testid="postflop-empty">
+            No postflop drill answers yet. Solve a spot in the analyzer and press “Drill this spot”.
+          </p>
+        ) : (
+          <>
+            <div className="stat-cards compact-cards">
+              <div className="stat-card">
+                <span className="stat-label">Postflop hands</span>
+                <span className="stat-value" data-testid="postflop-hands">
+                  {stats.postflop.length}
+                </span>
+              </div>
+              <div className="stat-card">
+                <span className="stat-label">Accuracy</span>
+                <span className="stat-value" data-testid="postflop-accuracy">
+                  {Math.round((stats.postflop.filter((r) => r.grade !== 'mistake').length / stats.postflop.length) * 100)}%
+                </span>
+              </div>
+              <div className="stat-card">
+                <span className="stat-label">Avg EV loss</span>
+                <span className="stat-value" data-testid="postflop-evloss">
+                  {(stats.postflop.reduce((a, r) => a + r.evLoss, 0) / stats.postflop.length).toFixed(2)}bb
+                </span>
+              </div>
+            </div>
+            <div className="table-scroll">
+              <table className="stat-table" data-testid="postflop-recent">
+                <thead>
+                  <tr>
+                    <th scope="col">Spot</th>
+                    <th scope="col">Hand</th>
+                    <th scope="col">Action</th>
+                    <th scope="col">Grade</th>
+                    <th scope="col">EV loss</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stats.postflop
+                    .slice(-10)
+                    .reverse()
+                    .map((r, i) => (
+                      <tr key={`${r.t}-${i}`}>
+                        <td className="small">{r.spot}</td>
+                        <td>{r.hand}</td>
+                        <td>{r.action}</td>
+                        <td>{GRADE_LABELS[r.grade]}</td>
+                        <td>{r.evLoss.toFixed(2)}bb</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+      </div>
+
       <div className="panel danger-zone">
         <h2>Reset</h2>
         {!confirming ? (
@@ -154,7 +214,7 @@ export function StatsScreen() {
           </button>
         ) : (
           <div role="alertdialog" aria-labelledby="reset-q" className="confirm">
-            <p id="reset-q">Delete all {agg.total.attempts} saved answers? This cannot be undone.</p>
+            <p id="reset-q">Delete all {agg.total.attempts + stats.postflop.length} saved answers (preflop and postflop)? This cannot be undone.</p>
             <div className="confirm-actions">
               <button
                 type="button"

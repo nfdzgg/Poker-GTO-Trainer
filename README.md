@@ -3,7 +3,7 @@
 A free, static web app for studying No-Limit Hold'em strategy:
 
 - **Preflop trainer** — drill 6-max 100bb decisions (raise first in, facing an open, facing a 3-bet) against 35 hand-written range charts, with Best / Acceptable mix / Mistake grading, explanations, a 13×13 range viewer and stats with your biggest leaks.
-- **Postflop analyzer** — build a heads-up spot (ranges, board, stacks, bet sizes) and solve it in your browser with a real CFR solver ([postflop-solver](https://github.com/b-inary/postflop-solver) compiled to WebAssembly), then browse the strategy node by node.
+- **Postflop analyzer** — build a heads-up spot (ranges, board, stacks, bet sizes) and solve it in your browser with a real CFR solver ([postflop-solver](https://github.com/b-inary/postflop-solver) compiled to WebAssembly), then browse the strategy node by node, or press **Drill this spot** to practise random hands at random decisions of the solved tree, graded against the solver with EV loss (results appear in a separate Postflop section of the stats).
 
 Everything runs in the browser: no backend, no accounts, no analytics and no network requests after the page has loaded. Stats and settings stay in your browser's `localStorage`.
 

@@ -33,3 +33,12 @@ export function gradeAction(freqs: HandFrequencies, actions: readonly PreflopAct
 export function isCorrect(g: Grade): boolean {
   return g === 'best' || g === 'acceptable';
 }
+
+/** The same Best / Acceptable mix / Mistake rule for an array of frequencies (used by the postflop drill). */
+export function gradeFrequencies(freqs: readonly number[], chosen: number): Grade {
+  const max = Math.max(...freqs);
+  const f = freqs[chosen] ?? 0;
+  if (Math.abs(f - max) < EPS) return 'best';
+  if (f >= ACCEPTABLE_THRESHOLD - EPS) return 'acceptable';
+  return 'mistake';
+}

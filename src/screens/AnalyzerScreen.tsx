@@ -11,6 +11,7 @@ import {
   type AnalyzerForm,
 } from '../analyzer/form';
 import { BoardPicker } from '../components/analyzer/BoardPicker';
+import { PostflopDrill } from '../components/analyzer/PostflopDrill';
 import { RangeEditor } from '../components/analyzer/RangeEditor';
 import { ResultsView } from '../components/analyzer/ResultsView';
 import { SizesEditor } from '../components/analyzer/SizesEditor';
@@ -43,6 +44,7 @@ export default function AnalyzerScreen({ clientFactory = () => new SolverClient(
   const [progress, setProgress] = useState<SolveProgress | null>(null);
   const [solveError, setSolveError] = useState<string | null>(null);
   const [solvedSeats, setSolvedSeats] = useState<{ oop: string; ip: string; key: number } | null>(null);
+  const [drilling, setDrilling] = useState(false);
   const clientRef = useRef<SolverClientLike | null>(null);
   const factoryRef = useRef(clientFactory);
   const getClient = useCallback(() => (clientRef.current ??= factoryRef.current()), []);
@@ -53,6 +55,7 @@ export default function AnalyzerScreen({ clientFactory = () => new SolverClient(
     setFormState((f) => ({ ...f, ...patch, name: patch.name ?? 'Custom spot' }));
     if (status !== 'solving') {
       setSolvedSeats(null);
+      setDrilling(false);
       setStatus('idle');
       setProgress(null);
     }
@@ -95,6 +98,7 @@ export default function AnalyzerScreen({ clientFactory = () => new SolverClient(
     setProgress({ iteration: 0, exploitability: NaN, elapsedMs: 0 });
     setSolveError(null);
     setSolvedSeats(null);
+    setDrilling(false);
     getClient()
       .solve(config, { targetExploitability: form.target, maxIterations: form.maxIterations, compression: plan.compression }, setProgress)
       .then((res) => {
@@ -225,8 +229,18 @@ export default function AnalyzerScreen({ clientFactory = () => new SolverClient(
           </div>
         </form>
 
-        {solvedSeats ? (
-          <ResultsView key={solvedSeats.key} source={source} seats={solvedSeats} rootLabel={`${street} root`} onNode={onNode} />
+        {solvedSeats && drilling ? (
+          <PostflopDrill source={source} seats={solvedSeats} spotName={form.name} onClose={() => setDrilling(false)} />
+        ) : solvedSeats ? (
+          <div className="results-col">
+            <div className="drill-cta panel">
+              <p className="small muted">Practice this solution: random hands at random decisions of the solved tree, graded with EV loss.</p>
+              <button type="button" className="btn btn-primary" onClick={() => setDrilling(true)} data-testid="drill-spot">
+                Drill this spot
+              </button>
+            </div>
+            <ResultsView key={solvedSeats.key} source={source} seats={solvedSeats} rootLabel={`${street} root`} onNode={onNode} />
+          </div>
         ) : (
           <div className="results panel results-empty">
             <h2>Results</h2>

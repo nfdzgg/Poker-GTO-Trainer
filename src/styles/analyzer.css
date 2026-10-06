@@ -306,3 +306,43 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* ---------- Postflop drill ---------- */
+.results-col {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.drill-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+.drill-cta p {
+  margin: 0;
+  flex: 1 1 220px;
+}
+.pf-line {
+  margin: 0;
+  font-size: var(--fs-sm);
+}
+.pf-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+.pf-hero p {
+  margin: 0;
+}
+.hero-cards-inline {
+  display: flex;
+  gap: var(--space-1);
+  perspective: 800px;
+}
+.compact-cards {
+  margin-bottom: var(--space-3);
+}
