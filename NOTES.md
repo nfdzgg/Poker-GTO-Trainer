@@ -20,6 +20,10 @@ Build notes for the Poker GTO Trainer (see `SPEC.md`-derived requirements in `sc
 - Drill "focus" mode (default on) deals only hands that are played in the spot or border a played hand in the 13×13 grid, so the drill concentrates on real decisions; it can be turned off.
 - Hand dealing is weighted by combos (pairs 6, suited 4, offsuit 12) times reach probability; the RNG is mulberry32 seeded from the clock or `?seed=` in the drill URL.
 - Explanations combine: the spot description, the hero position, the exact chart frequencies, a verdict sentence for the chosen action, a template keyed on (spot type × hand category) and a sentence on what the main action accomplishes.
+- Each drill deal is a pure function of (seed, deal number, filters), so `?seed=` replays a session exactly and React re-renders cannot consume RNG state.
+- The stats file is `{version: 1, records: [...], postflop: [...]}` under `pgt.stats.v1`; anything unparseable, of another version or of the wrong shape loads as empty stats and individual malformed records are dropped. Records are capped at 20,000.
+- "Correct" for accuracy = Best or Acceptable mix. Leak buckets are only the position × spot-type pairs that exist (BB has no RFI spot; those cells show "n/a").
+- The reset confirmation is an in-page `alertdialog` rather than `window.confirm`, so it is styleable and testable.
 - Motion durations are defined once as CSS custom properties in `src/styles/tokens.css`; JS reads them at runtime with `getComputedStyle` (fallback constants exist only for jsdom, where stylesheets are not computed).
 
 ## Test changes
@@ -43,3 +47,9 @@ Vite + React + TS strict, ESLint, Vitest, Playwright (pinned), hash routing, des
 35 hand-written spot files (RFI UTG 16.1%, HJ 21.0%, CO 28.4%, BTN 44.1%, SB 43.0%), range parser/formatter, combo math, seedable drill dealer with filters, Best/Acceptable/Mistake grading, template explanations for all 35×169×actions.
 
 `VERIFY SUMMARY: required 10/43, stretch 0/2, skipped 0`
+
+### M2 — 2026-10-06 — drill UI, range viewer, stats
+
+Drill screen with felt table, dealt SVG cards, action buttons, grade badge, explanation, frequency bar and range link; 13×13 range viewer with proportional bands, legend, detail panel, roving-tabindex keyboard navigation; stats screen (versioned localStorage, accuracy tables, biggest leaks with drill links, confirm-to-reset).
+
+`VERIFY SUMMARY: required 18/43, stretch 0/2, skipped 0`

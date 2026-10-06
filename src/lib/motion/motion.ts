@@ -63,26 +63,29 @@ export function useAnimPhases<P extends string>(
   const reduced = useReducedMotion();
   const skip = reduced || !enabled;
   const first = steps[0]?.[0] ?? final;
-  const [phase, setPhase] = useState<P>(skip ? final : first);
+  const [state, setState] = useState<{ key: unknown; phase: P }>(() => ({ key, phase: skip ? final : first }));
   const stepsRef = useRef(steps);
   stepsRef.current = steps;
 
   useEffect(() => {
     const s = stepsRef.current;
     if (skip || s.length === 0) {
-      setPhase(final);
+      setState({ key, phase: final });
       return;
     }
     const timers: ReturnType<typeof setTimeout>[] = [];
-    setPhase(s[0]![0]);
+    setState({ key, phase: s[0]![0] });
     let at = 0;
     for (let i = 0; i < s.length; i++) {
       at += s[i]![1];
       const next = i + 1 < s.length ? s[i + 1]![0] : final;
-      timers.push(setTimeout(() => setPhase(next), at));
+      timers.push(setTimeout(() => setState({ key, phase: next }), at));
     }
     return () => timers.forEach(clearTimeout);
   }, [key, skip, final]);
 
-  return phase;
+  // When the key changes, start from the first phase immediately (no stale frame).
+  if (!Object.is(state.key, key)) return skip ? final : first;
+  if (skip) return final;
+  return state.phase;
 }

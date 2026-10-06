@@ -15,6 +15,7 @@ body {
 html {
   color-scheme: dark;
   -webkit-text-size-adjust: 100%;
+  background-color: var(--felt-950);
 }
 
 body {
