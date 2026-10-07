@@ -29,7 +29,7 @@ export const LESSONS: LessonMeta[] = [
     title: 'The table and positions',
     minutes: 5,
     goal: 'Name the six seats, know who acts first before and after the flop, and why position matters.',
-    takeaway: 'Late seats (CO, BTN) act last after the flop and can play more hands; the blinds pay to play and are out of position.',
+    takeaway: 'Late seats (CO, BTN) act late after the flop (the button always acts last) and can play more hands; the blinds pay to play and are out of position.',
   },
   {
     id: 'hands',

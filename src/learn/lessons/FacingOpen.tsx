@@ -36,7 +36,8 @@ export function FacingOpenLesson() {
       <HandExample spotId="vsopen-BB-vs-BTN" hand="98o" note="Even a weak-looking hand like 98o is a call in the big blind against a button open." />
       <h2>4. The small blind plays 3-bet or fold</h2>
       <p>
-        The small blind is out of position against everyone and can still be squeezed by the big blind, so it rarely calls:
+        The small blind is out of position against everyone, and if it just calls, the big blind can still re-raise behind
+        it (a “squeeze”), so it rarely calls:
         about {reachPercent(sb, 'call').toFixed(1)}% of hands against a button open, while it 3-bets about{' '}
         {reachPercent(sb, '3bet').toFixed(0)}%.
       </p>

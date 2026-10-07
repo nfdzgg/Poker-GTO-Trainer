@@ -44,13 +44,15 @@ export function HandsLesson() {
       </p>
       <h2>The 13×13 grid</h2>
       <p>
-        Every chart in this app is drawn on a 13×13 grid. Ranks run A, K, Q … 2 along both the rows and the columns. The{' '}
+        Every chart in this app shows a <strong>range</strong>: the set of hands a player plays a certain way in one spot
+        (for example, every hand UTG opens), with each hand colored by how often it raises, calls or folds. Charts are drawn
+        on a 13×13 grid. Ranks run A, K, Q … 2 along both the rows and the columns. The{' '}
         <strong>diagonal</strong> holds the pairs, everything <strong>above</strong> it is suited and everything{' '}
         <strong>below</strong> it is offsuit. To find a hand, take the row of its higher card and the column of its lower
         card (or the other way round for offsuit hands).
       </p>
       <Callout title="Hand categories" tone="info">
-        The drill describes hands by category: <em>premium</em> (AA–QQ, AK), <em>strong broadways</em> (AQ, AJ, KQs),{' '}
+        The drill describes hands by category: <em>premium</em> (AA–QQ, AK), <em>strong broadways</em> (AQ, AJ, AT, KQs; broadway cards are A, K, Q, J and T),{' '}
         <em>suited wheel aces</em> (A5s–A2s), <em>suited connectors</em> (T9s, 76s…), <em>small pairs</em> and so on. Each
         category tends to play the same way, which makes the charts much easier to remember.
       </Callout>

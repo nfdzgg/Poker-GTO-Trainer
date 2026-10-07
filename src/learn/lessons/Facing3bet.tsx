@@ -7,6 +7,7 @@ export function Facing3betLesson() {
   const btnBb = getSpot('vs3bet-BTN-vs-BB')!;
   const utgBtn = getSpot('vs3bet-UTG-vs-BTN')!;
   const coBtn = getSpot('vs3bet-CO-vs-BTN')!;
+  const coBb = getSpot('vs3bet-CO-vs-BB')!;
   const cont = (s: typeof btnBb) => (100 - reachPercent(s, 'fold')).toFixed(0);
   return (
     <>
@@ -23,14 +24,16 @@ export function Facing3betLesson() {
       <h2>Three groups of hands</h2>
       <ul className="lesson-list">
         <li>
-          <strong>4-bet for value:</strong> the very best hands (QQ+, AK).
+          <strong>4-bet for value:</strong> the very best hands: AA, KK and AKs every time; QQ and AKo often, mixed with
+          calls.
         </li>
         <li>
           <strong>4-bet as a bluff:</strong> a few suited wheel aces, for the same blocker reasons as before.
         </li>
         <li>
-          <strong>Call:</strong> strong hands that play well after the flop — pairs, AQ, suited broadways, suited connectors in
-          position.
+          <strong>Call:</strong> hands that play well after the flop — pairs from about 77 to JJ, AQ, and good suited
+          broadways (AJs, KQs, KJs, QJs, JTs). Smaller pairs and suited connectors call mainly when you opened a wide range
+          from the button or small blind; from earlier seats they usually fold.
         </li>
       </ul>
       <HandExample spotId="vs3bet-BTN-vs-BB" hand="KK" note="KK always 4-bets." />
@@ -38,8 +41,9 @@ export function Facing3betLesson() {
       <HandExample spotId="vs3bet-UTG-vs-BTN" hand="AJo" note="UTG folds AJo: it is dominated by AQ/AK and out of position." />
       <h2>Position matters again</h2>
       <p>
-        Out of position you continue tighter, because a big pot is hard to play when you act first. The cutoff, which is out
-        of position against a button 3-bet, continues with only about <strong>{cont(coBtn)}%</strong> of its opens.
+        Out of position you continue tighter, because a big pot is hard to play when you act first. The cutoff continues
+        with about <strong>{cont(coBb)}%</strong> of its opens against a big blind 3-bet (in position) but only about{' '}
+        <strong>{cont(coBtn)}%</strong> against a button 3-bet (out of position).
       </p>
       <Callout title="Rule of thumb" tone="key">
         4-bet the best hands and a few blockers, call hands that play well (more of them in position), and fold the bottom of

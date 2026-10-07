@@ -202,6 +202,19 @@ describe('practice plan', () => {
     const pf = PLAN.find((s) => s.id === 'postflop')!;
     expect(stageProgress(pf, file([], 19)).done).toBe(false);
     expect(stageProgress(pf, file([], 20)).done).toBe(true);
+    // the mixed stage needs all three spot types in the window; the every-seat stage needs non-BB hands
+    const mix = PLAN.find((s) => s.id === 'mix')!;
+    const onlyOpens = many(100, () => rec('rfi', 'CO', true));
+    expect(stageProgress(mix, file(onlyOpens)).done).toBe(false);
+    expect(stageProgress(mix, file(onlyOpens)).summary).toMatch(/play all three spot types/);
+    const varied = many(100, (i) => rec((['rfi', 'vs-open', 'vs-3bet'] as const)[i % 3]!, 'CO', true));
+    expect(stageProgress(mix, file(varied)).done).toBe(true);
+    const vsOpen = PLAN.find((s) => s.id === 'vs-open')!;
+    const bbHeavy = many(40, (i) => rec('vs-open', i < 30 ? 'BB' : 'CO', true));
+    expect(stageProgress(vsOpen, file(bbHeavy)).done).toBe(false);
+    expect(stageProgress(vsOpen, file(bbHeavy)).summary).toMatch(/seats other than the big blind/);
+    const spread = many(40, (i) => rec('vs-open', i % 2 ? 'BB' : 'BTN', true));
+    expect(stageProgress(vsOpen, file(spread)).done).toBe(true);
     expect(currentStage(file([]))!.id).toBe('open');
     expect(currentStage(file(many(30, () => rec('rfi', 'BTN', true))))!.id).toBe('bb');
   });

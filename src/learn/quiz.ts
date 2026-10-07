@@ -102,7 +102,7 @@ export const QUIZZES: Record<string, Question[]> = {
     choice('table-first-postflop', 'After the flop, which player still in the hand acts first?', ['The button', 'The small blind (or the next player to its left still in the hand)', 'Whoever raised preflop', 'UTG, always'], 'The small blind (or the next player to its left still in the hand)', 'From the flop on, action starts with the first player still in the hand to the left of the button. That is why the blinds are out of position after the flop and the button always acts last.'),
     choice(
       'table-btn-bb',
-      'The button opens and the big blind calls. Who is in position after the flop?',
+      'The button raises before the flop and the big blind calls. Who is in position after the flop?',
       ['The button', 'The big blind'],
       inPosition('BTN', 'BB') ? 'The button' : 'The big blind',
       'Being in position means acting last on every later street, so you see what your opponent does before you decide. The button is in position against everyone.',
@@ -118,7 +118,7 @@ export const QUIZZES: Record<string, Question[]> = {
       prompt: 'Tap 76s (seven-six suited) on the grid. Pairs are on the diagonal, suited hands above it, offsuit hands below it.',
       isCorrect: (h) => h === '76s',
       answer: '76s is in the 7 row, under the 6 column, above the diagonal',
-      explain: 'Read the row for the higher card and the column for the lower card. Above the diagonal the hand is suited ("s"), below it offsuit ("o").',
+      explain: 'For a suited hand, read the row for the higher card and the column for the lower card; offsuit hands are the other way round. Above the diagonal the hand is suited ("s"), below it offsuit ("o").',
       showKinds: true,
     },
     choice('hands-offsuit', 'Where are the offsuit hands on the 13×13 grid?', ['Above the diagonal', 'On the diagonal', 'Below the diagonal'], 'Below the diagonal', 'Pairs sit on the diagonal, suited hands above it and offsuit hands below it. The same hand (for example AK) appears twice: AKs above, AKo below.'),
@@ -133,7 +133,7 @@ export const QUIZZES: Record<string, Question[]> = {
       `${Math.round(potOddsBb * 100)}%`,
       `Pot odds = what you pay ÷ (pot + what you pay) = ${bbVsBtn.toCall} ÷ ${bbVsBtn.pot + bbVsBtn.toCall} ≈ ${pct(potOddsBb)}. That cheap price is why the big blind defends so many hands.`,
     ),
-    choice('money-3bet', 'In this trainer, how big is a 3-bet made out of position (from the blinds) compared with the open?', ['About 2×', 'About 4×', 'About 10×'], `About ${bbVsBtn.sizes.threeBet! / bbVsBtn.sizes.open}×`, 'Out of position you 3-bet bigger (about 4× the open, e.g. 10bb against 2.5bb) because you will have to play the rest of the hand without position. In position it is about 3×.'),
+    choice('money-3bet', 'In this trainer, how big is a 3-bet made out of position (for example from the big blind against a button open) compared with the open?', ['About 2×', 'About 4×', 'About 10×'], `About ${bbVsBtn.sizes.threeBet! / bbVsBtn.sizes.open}×`, 'Out of position you 3-bet bigger (about 4× the open, e.g. 10bb against 2.5bb) because you will have to play the rest of the hand without position. In position it is about 3×.'),
   ],
   opening: [
     choice('opening-widest', 'Which seat opens the widest range when everyone has folded to it (UTG, HJ, CO or BTN)?', ['UTG', 'HJ', 'CO', 'BTN'], widestOpener, 'The later your seat, the fewer players are left behind you who could have a strong hand, so you can open more hands. The button only has the two blinds left to beat, and they will play out of position.'),
@@ -173,7 +173,7 @@ export const QUIZZES: Record<string, Question[]> = {
         if (sb === 'call' && bb === 'call') return 'Call in both';
         return '3-bet in both';
       })(),
-      'The small blind has to put in more, is out of position and can be squeezed by the big blind, so it plays mostly 3-bet-or-fold. The big blind gets the best price and closes the action.',
+      'The small blind has to put in more, is out of position, and if it just calls the big blind can still re-raise behind it (a “squeeze”), so it plays mostly 3-bet-or-fold. The big blind gets the best price and closes the action.',
     ),
     choice(
       'open-who-calls',
@@ -192,7 +192,7 @@ export const QUIZZES: Record<string, Question[]> = {
       ['K5o', 'A5s', '98o', '22'].reduce((a, b) => ((bbVsBtn.hands[b]!['3bet'] ?? 0) > (bbVsBtn.hands[a]!['3bet'] ?? 0) ? b : a)),
       'A5s is a classic 3-bet bluff: the ace makes it less likely the opener has AA or AK, and when called it can still make wheels and nut flushes. The other hands are better as calls.',
     ),
-    choice('vb-why-a5s', 'Why are suited wheel aces (A2s–A5s) popular bluffs?', ['They block the opponent’s best aces and keep good equity when called', 'They are among the strongest hands', 'Opponents always fold to them'], 'They block the opponent’s best aces and keep good equity when called', 'Good bluffs remove some of the opponent’s strong hands (blockers) and can still win when called. Hands that are too good to fold, like AQ, make better calls than bluffs.'),
+    choice('vb-why-a5s', 'Why are suited wheel aces (A2s–A5s) popular bluffs?', ['They block the opponent’s best aces and keep good equity when called', 'They are among the strongest hands', 'Opponents always fold to them'], 'They block the opponent’s best aces and keep good equity when called', 'Good bluffs remove some of the opponent’s strong hands (blockers) and can still win when called. Hands that are too good to fold but not strong enough to raise for value, like A9s in the big blind, make better calls than bluffs.'),
     choice(
       'vb-grade-a5s',
       `Big blind against a button open: the chart plays A5s as 3-bet ${pct(a5sBb['3bet'] ?? 0)} and call ${pct(a5sBb.call ?? 0)}. You call. How is that graded?`,
@@ -229,7 +229,7 @@ export const QUIZZES: Record<string, Question[]> = {
   practice: [
     choice('practice-next', 'After 30 hands your accuracy as the big blind facing opens is 60%. What is the best next step?', ['Move on to postflop', 'Reset your stats and start over', 'Drill “facing an open” from the big blind, review the range after each answer, until you are above 80%'], 'Drill “facing an open” from the big blind, review the range after each answer, until you are above 80%', 'Practise the weak spot on purpose. Seeing the full range right after each answer shows you which hands you misjudged.'),
     choice('practice-always', 'What does the “Always” range setting in the drill do?', ['Hides the explanation', 'Shows the range while you decide; those answers are practice and are not graded', 'Makes the drill harder'], 'Shows the range while you decide; those answers are practice and are not graded', 'Open-book practice is great for learning a new spot. Switch back to “After I answer” to test yourself for real.'),
-    choice('practice-good', 'What counts as “good enough” to move on to the next stage of your practice plan?', ['A perfect score with no mistakes', 'Any five correct answers in a row', 'About 80–85% correct over your recent hands of that spot type'], 'About 80–85% correct over your recent hands of that spot type', 'Mixed hands make 100% unrealistic and unnecessary. Consistently above the target over a few dozen hands means the spot is learned.'),
+    choice('practice-good', 'What counts as “good enough” to move on to the next stage of your practice plan?', ['A perfect score with no mistakes', 'Any five correct answers in a row', 'About 80–85% correct over your recent hands of that spot type'], 'About 80–85% correct over your recent hands of that spot type', 'With 35 charts and many borderline hands, 100% is unrealistic and unnecessary. Consistently above the target over a few dozen hands means the spot is learned.'),
   ],
   postflop: [
     choice('pf-solver', 'What does a poker solver do?', ['Predicts the next card', 'Finds strategies for both players that neither can improve on', 'Reads your opponent’s tells'], 'Finds strategies for both players that neither can improve on', 'A solver plays the spot against itself over and over and adjusts both players until neither can gain by changing strategy (an equilibrium).'),
@@ -238,7 +238,7 @@ export const QUIZZES: Record<string, Question[]> = {
   ],
 };
 
-/** Hands that satisfy a grid question (used by tests and the "show answer" button). */
+/** Hands that satisfy a grid question (used by tests). */
 export function gridAnswers(q: GridQuestion, hands: readonly string[]): string[] {
   return hands.filter((h) => q.isCorrect(h));
 }

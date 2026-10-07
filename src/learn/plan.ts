@@ -1,5 +1,5 @@
 // The practice plan shown after the course: staged goals measured on graded (not open-book) stats.
-import { SPOT_TYPE_NAMES, type Position, type SpotType } from '../lib/preflop/types';
+import { SPOT_TYPES, SPOT_TYPE_NAMES, type Position, type SpotType } from '../lib/preflop/types';
 import { biggestLeaks, gradedRecords } from '../lib/stats/aggregate';
 import { isCorrect } from '../lib/preflop/grading';
 import { hrefFor } from '../lib/router';
@@ -108,6 +108,8 @@ export interface StageProgress {
 }
 
 const pct = (x: number) => `${Math.round(x * 100)}%`;
+/** In the mixed stage, each spot type must appear at least this often in the recent window. */
+export const MIN_PER_TYPE = 5;
 
 export function stageProgress(stage: PlanStage, stats: StatsFile): StageProgress {
   if (stage.id === 'postflop') {
@@ -136,7 +138,11 @@ export function stageProgress(stage: PlanStage, stats: StatsFile): StageProgress
   const recs = graded.filter((r) => (!f.type || r.type === f.type) && (!f.pos || r.hero === f.pos));
   const recent = recs.slice(-stage.window);
   const acc = recent.length ? recent.filter((r) => isCorrect(r.grade)).length / recent.length : null;
-  const done = recs.length >= stage.minHands && acc !== null && acc >= stage.target;
+  // The mixed stage needs every spot type in the recent window; "every seat" needs mostly non-big-blind hands,
+  // so hands from earlier stages can't complete these stages on their own.
+  const mixed = stage.id !== 'mix' || SPOT_TYPES.every((t) => recent.filter((r) => r.type === t).length >= MIN_PER_TYPE);
+  const spread = stage.id !== 'vs-open' || recent.filter((r) => r.hero !== 'BB').length >= recent.length / 2;
+  const done = recs.length >= stage.minHands && acc !== null && acc >= stage.target && mixed && spread;
   const handsPart = Math.min(1, recs.length / stage.minHands);
   const accPart = acc === null ? 0 : Math.min(1, acc / stage.target);
   return {
@@ -146,7 +152,9 @@ export function stageProgress(stage: PlanStage, stats: StatsFile): StageProgress
     progress: done ? 1 : Math.min(0.99, handsPart * accPart),
     summary:
       `${Math.min(recs.length, stage.minHands)}/${stage.minHands} hands` +
-      (acc === null ? ` · target ${pct(stage.target)}` : ` · ${pct(acc)} of the last ${recent.length} (target ${pct(stage.target)})`),
+      (acc === null ? ` · target ${pct(stage.target)}` : ` · ${pct(acc)} of the last ${recent.length} (target ${pct(stage.target)})`) +
+      (recent.length && !mixed ? ' · play all three spot types (use “All spots”)' : '') +
+      (recent.length && !spread ? ' · play more hands from seats other than the big blind' : ''),
   };
 }
 

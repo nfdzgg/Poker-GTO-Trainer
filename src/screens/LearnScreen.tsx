@@ -209,7 +209,8 @@ function PlanView() {
       <h1 id="plan-title">Your practice plan</h1>
       <p className="lead muted">
         Work through the stages in order. Each one measures your <strong>graded</strong> drill answers (open-book answers don’t
-        count) and is done when you reach the target over your recent hands.
+        count) and is done when you reach its target: over your recent hands for the drill stages, and over all your graded
+        answers for each seat and spot type in the leaks stage.
       </p>
       {progress.completed.length < LESSONS.length - 1 && (
         <p className="small muted">

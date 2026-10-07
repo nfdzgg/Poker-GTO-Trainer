@@ -31,7 +31,7 @@ export function PracticeLesson() {
       </ol>
       <h2>What “good” looks like</h2>
       <p>
-        Mixed hands make 100% unrealistic. Aim for <strong>about 80–85% correct</strong> over your recent hands of a spot
+        With 35 charts and many borderline hands, 100% is unrealistic. Aim for <strong>about 80–85% correct</strong> over your recent hands of a spot
         type, then move on. The <a href={hrefFor('stats')}>Stats</a> screen shows accuracy by seat and spot type and lists your
         three biggest leaks, each with a button that starts a drill on exactly that spot.
       </p>

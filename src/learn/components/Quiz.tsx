@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { RangeGrid, type CellInfo } from '../../components/RangeGrid';
-import { comboCount, handClass, HAND_LABELS } from '../../lib/poker/hands';
+import { comboCount, handClass } from '../../lib/poker/hands';
 import { durationMs, useAnimPhases } from '../../lib/motion/motion';
-import { gridAnswers, type Question } from '../quiz';
+import type { Question } from '../quiz';
 
 type Status = { kind: 'idle' } | { kind: 'wrong'; picked: string; tries: number } | { kind: 'right'; picked: string; firstTry: boolean } | { kind: 'revealed' };
 
@@ -106,7 +106,7 @@ export function QuizQuestion({ question: q, number, solvedBefore, onAnswer }: Pr
         )}
         {revealed && (
           <Feedback ok={false} animKey={`rev-${attempt}`}>
-            <strong>Answer:</strong> {q.kind === 'choice' ? q.options[q.correct] : gridAnswers(q, HAND_LABELS).join(', ')}. Select it to continue. {q.explain}
+            <strong>Answer:</strong> {q.kind === 'choice' ? q.options[q.correct] : q.answer}. Select it to continue. {q.explain}
           </Feedback>
         )}
         {solved && (

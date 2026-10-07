@@ -8,7 +8,7 @@ export function OpeningLesson() {
     <>
       <p>
         When everyone before you has folded, you are the first to act voluntarily. This is called <strong>raise first in</strong>{' '}
-        (RFI) or <strong>opening</strong>. You have two options in these charts: <strong>raise</strong> to 2.5bb or{' '}
+        (RFI) or <strong>opening</strong>. You have two options in these charts: <strong>raise</strong> to 2.5bb (3bb from the small blind) or{' '}
         <strong>fold</strong>.
       </p>
       <Callout title="Raise or fold — never limp" tone="key">
@@ -23,7 +23,7 @@ export function OpeningLesson() {
         blind opens wide too because only the big blind is left, but it will be out of position, so it doesn’t open more
         than the button.
       </p>
-      <HandExample spotId="rfi-UTG" hand="K9o" note="UTG folds K9o: it is often dominated by better kings that continue." />
+      <HandExample spotId="rfi-UTG" hand="K9o" note="UTG folds K9o: it is often dominated — players who continue often hold a better king such as AK, KQ or KJ, and when both players pair the king, the higher second card (the kicker) wins." />
       <HandExample spotId="rfi-BTN" hand="K9o" note="The button opens the same hand every time." />
       <h2>How the drill grades you</h2>
       <ul className="lesson-list">
