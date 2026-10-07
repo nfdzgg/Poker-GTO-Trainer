@@ -17,7 +17,10 @@ interface Props {
   beforeAnswer: boolean;
 }
 
-/** The chart for the current drill spot, with the dealt hand outlined. Hover, tap or focus a hand for exact numbers. */
+/**
+ * The chart for the current drill spot. The dealt hand is lifted and ringed in brass, with guides
+ * along its row and column; hover, tap or focus any hand for its exact mix.
+ */
 export function StudyRangePanel({ spot, hand, beforeAnswer }: Props) {
   const [hovered, setHovered] = useState<string | null>(null);
   const [pinned, setPinned] = useState<string | null>(null);
@@ -39,13 +42,14 @@ export function StudyRangePanel({ spot, hand, beforeAnswer }: Props) {
   return (
     <section className="panel study-range" aria-labelledby="study-range-title" data-testid="study-range">
       <div className="study-head">
-        <h2 id="study-range-title">Range: {spotTitle(spot)}</h2>
+        <h2 id="study-range-title" title={`Range: ${spotTitle(spot)}`}>
+          Range: {spotTitle(spot)}
+        </h2>
         <span className={`study-badge${beforeAnswer ? ' open-book' : ''}`}>{beforeAnswer ? 'Open book' : 'Review'}</span>
       </div>
-      <p className="muted small">
-        Your hand <strong>{hand}</strong> is outlined. Hover, tap or focus any hand for its exact mix.
-      </p>
-      <RangeGrid getCell={getCell} selected={hand} onSelect={setPinned} onHover={setHovered} label={`Range for ${spot.description}`} compact />
+      <div className="study-grid">
+        <RangeGrid getCell={getCell} selected={hand} onSelect={setPinned} onHover={setHovered} label={`Range for ${spot.description}`} compact />
+      </div>
       <div className="legend" data-testid="study-legend">
         {spot.actions.map((a) => (
           <span key={a} className="legend-item" data-action={a}>
@@ -53,20 +57,20 @@ export function StudyRangePanel({ spot, hand, beforeAnswer }: Props) {
             {ACTION_LABELS[a]} <strong>{reachPercent(spot, a).toFixed(1)}%</strong>
           </span>
         ))}
-        <span className="legend-note muted small">{base}</span>
+        <span className="legend-note muted">{base}</span>
       </div>
-      <div className="study-detail" data-testid="study-detail" aria-live="polite">
+      <div className={`study-detail${detail === hand ? ' is-hand' : ''}`} data-testid="study-detail" aria-live="polite">
         <h3>
-          {detail}
+          <span className={detail === hand ? 'hand-key' : undefined}>{detail}</span>
           {detail === hand && <span className="muted small"> · your hand</span>}
         </h3>
         <p className="muted small">
           {CATEGORY_LABELS[categorize(detail)]} · {comboCount(detail)} combos
           {reachWeight(spot, detail) <= 0 ? ` · not in the ${spot.hero} opening range` : ''}
         </p>
-        <dl className="freq-list">
+        <dl className="freq-inline">
           {spot.actions.map((a) => (
-            <div key={a} className="freq-row">
+            <div key={a} className="freq-chip">
               <dt>
                 <span className="legend-swatch" style={{ background: ACTION_COLORS[a] }} />
                 {ACTION_LABELS[a]}
@@ -75,6 +79,23 @@ export function StudyRangePanel({ spot, hand, beforeAnswer }: Props) {
             </div>
           ))}
         </dl>
+      </div>
+    </section>
+  );
+}
+
+/** Keeps the range column in place while "After I answer" hides the chart, so the layout does not jump. */
+export function RangePlaceholder() {
+  return (
+    <section className="panel study-range range-placeholder" aria-labelledby="range-placeholder-title" data-testid="range-placeholder">
+      <div className="study-head">
+        <h2 id="range-placeholder-title">Range</h2>
+        <span className="study-badge">After you answer</span>
+      </div>
+      <div className="study-grid">
+        <div className="placeholder-grid">
+          <p className="muted small">The chart for this spot appears here as soon as you answer, with your hand highlighted.</p>
+        </div>
       </div>
     </section>
   );

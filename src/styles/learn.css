@@ -424,7 +424,7 @@
   gap: var(--space-3);
 }
 
-/* Drill: practice-plan goal and course nudge */
+/* Drill: practice-plan goal */
 .goal-strip {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(120px, 220px) auto;
@@ -439,13 +439,6 @@
 }
 .goal-text {
   font-size: var(--fs-sm);
-}
-.nudge {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
-  margin: var(--space-3) 0 0;
 }
 
 @media (max-width: 720px) {

@@ -1,6 +1,7 @@
 import type { CardId } from '../lib/poker/cards';
 import { POSITIONS, type Position, type PreflopAction, type SpotData } from '../lib/preflop/types';
 import { BetChips, ChipStack } from './Chip';
+import { DealerButton } from './DealerButton';
 import { PlayingCard } from './PlayingCard';
 
 type SeatStatus = 'hero' | 'folded' | 'waiting' | 'raised' | '3bet';
@@ -82,13 +83,16 @@ export function PokerTable({ spot, cards, fourColor, dealKey, heroAction }: Prop
           const isHero = s.status === 'hero';
           return (
             <div key={s.pos}>
+              {/* the dealer button sits on the felt beside the BTN seat (slot k decides which side) */}
+              {s.pos === 'BTN' && <DealerButton className={`table-dealer dealer-slot-${k}`} style={{ left: `${x}%`, top: `${y}%` }} />}
               <div
                 className={`seat seat-${s.status}`}
                 style={{ left: `${x}%`, top: `${y}%` }}
                 data-position={s.pos}
-                aria-label={`${s.pos}${isHero ? ' (you)' : ''}: ${s.note || 'waiting'}`}
+                aria-label={`${s.pos}${isHero ? ' (you)' : ''}${s.pos === 'BTN' ? ', dealer button' : ''}: ${s.note || 'waiting'}`}
               >
                 <span className="seat-pos">{s.pos}</span>
+                {s.pos === 'BTN' && <span className="visually-hidden">, dealer button</span>}
                 {!isHero && <span className="seat-note">{s.note || '…'}</span>}
               </div>
               {s.bet > 0 && !isHero && (

@@ -154,7 +154,7 @@ const read = (p: string) => (existsSync(p) ? readFileSync(p, 'utf8') : '');
   const sections = ['Assumptions', 'Decisions', 'Test changes', 'Known limitations', 'Milestone log'];
   const missing = sections.filter((s) => !new RegExp(`^##\\s+${s}\\s*$`, 'mi').test(notes));
   const logPart = notes.split(/^##\s+Milestone log\s*$/im)[1] ?? '';
-  const entries = [...logPart.matchAll(/^###\s+(M\d)\b[^\n]*?(\d{4}-\d{2}-\d{2})[^\n]*\n([\s\S]*?)(?=^###\s|^##\s|$(?![\s\S]))/gm)];
+  const entries = [...logPart.matchAll(/^###\s+(M\d+)\b[^\n]*?(\d{4}-\d{2}-\d{2})[^\n]*\n([\s\S]*?)(?=^###\s|^##\s|$(?![\s\S]))/gm)];
   const problems: string[] = [];
   for (const e of entries) {
     if (!/VERIFY SUMMARY: required \d+\/\d+, stretch \d+\/\d+, skipped \d+/.test(e[3]!)) problems.push(`${e[1]} entry lacks a verify summary line`);
@@ -162,7 +162,7 @@ const read = (p: string) => (existsSync(p) ? readFileSync(p, 'utf8') : '');
   let committed: string[] = [];
   try {
     const log = execSync('git log --format=%s', { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
-    committed = [...new Set([...log.matchAll(/^milestone\((M\d)\)/gm)].map((m) => m[1]!))];
+    committed = [...new Set([...log.matchAll(/^milestone\((M\d+)\)/gm)].map((m) => m[1]!))];
   } catch {
     // not a git checkout
   }

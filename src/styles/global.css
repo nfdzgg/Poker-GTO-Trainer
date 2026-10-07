@@ -166,6 +166,11 @@ textarea {
   color: var(--text-strong);
 }
 
+/* The hidden attribute always wins over a component's display value. */
+[hidden] {
+  display: none !important;
+}
+
 .visually-hidden {
   position: absolute !important;
   width: 1px;

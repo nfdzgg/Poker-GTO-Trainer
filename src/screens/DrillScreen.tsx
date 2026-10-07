@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { SpotInfoPanel } from '../components/drill/SpotInfoPanel';
-import { StudyRangePanel } from '../components/drill/StudyRangePanel';
+import { RangePlaceholder, StudyRangePanel } from '../components/drill/StudyRangePanel';
 import { FrequencyBar } from '../components/FrequencyBar';
 import { GradeBadge } from '../components/GradeBadge';
 import { heroBetAfter, PokerTable } from '../components/PokerTable';
 import { createRng, randomSeed } from '../lib/rng';
 import { hrefFor } from '../lib/router';
+import { DRILL_FIT_QUERY, DRILL_SHORT_QUERY, useMediaQuery } from '../lib/media';
 import { DRILL_RANGE_MODES, usePrefs, type DrillRangeMode } from '../lib/prefs';
 import { preflopBands } from '../lib/preflop/colors';
 import { dealHand, type DealtHand, type DrillFilters } from '../lib/preflop/drill';
 import { explain, type Explanation } from '../lib/preflop/explain';
-import { isCorrect } from '../lib/preflop/grading';
+import { GRADE_LABELS, isCorrect } from '../lib/preflop/grading';
 import { ALL_SPOTS } from '../lib/preflop/spots';
 import { ACTION_LABELS, isPosition, isSpotType, POSITIONS, SPOT_TYPE_NAMES, SPOT_TYPES, type Position, type PreflopAction, type SpotType } from '../lib/preflop/types';
 import { addRecord, loadStats } from '../lib/stats/store';
@@ -55,7 +56,20 @@ export function DrillScreen({ params }: { params?: URLSearchParams }) {
   // Deal number on which the range was visible before answering (open book), if any.
   const [peekedDeal, setPeekedDeal] = useState<number | null>(null);
   const [prefs, setPrefs] = usePrefs();
+  // One-screen desktop layout (columns) or the stacked phone/tablet layout.
+  const fit = useMediaQuery(DRILL_FIT_QUERY);
+  // Short desktop windows fold the settings into a pop-over opened from the title row.
+  const foldSettings = useMediaQuery(DRILL_SHORT_QUERY) && fit;
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const settingsToggleRef = useRef<HTMLButtonElement>(null);
+  // One-screen layout only: after answering, the side column shows the result and the spot info is one click away.
+  const [coachView, setCoachView] = useState<'result' | 'info'>('result');
   const nextRef = useRef<HTMLButtonElement>(null);
+  const settingsRef = useRef<HTMLDivElement>(null);
+  const showInfoRef = useRef<HTMLButtonElement>(null);
+  const showResultRef = useRef<HTMLButtonElement>(null);
+  // Which toggle the user just pressed, so focus can move to its counterpart once it is rendered.
+  const toggledTo = useRef<'result' | 'info' | null>(null);
 
   // Each deal is a pure function of (seed, deal number, filters), so a fixed ?seed= replays exactly.
   const deal = useMemo(
@@ -93,6 +107,7 @@ export function DrillScreen({ params }: { params?: URLSearchParams }) {
       // Answers given after seeing the range (even briefly) are open-book practice, tracked separately.
       const assisted = prefs.drillRange === 'always' || peekedDeal === dealNo;
       setAnswer({ action, result });
+      setCoachView('result');
       setSession((s) => ({
         hands: s.hands + 1,
         correct: s.correct + (!assisted && isCorrect(result.grade) ? 1 : 0),
@@ -117,6 +132,37 @@ export function DrillScreen({ params }: { params?: URLSearchParams }) {
   useEffect(() => {
     if (answer) nextRef.current?.focus();
   }, [answer]);
+
+  useEffect(() => {
+    if (toggledTo.current === 'info') showResultRef.current?.focus();
+    else if (toggledTo.current === 'result') showInfoRef.current?.focus();
+    toggledTo.current = null;
+  }, [coachView]);
+
+  const toggleCoach = (view: 'result' | 'info') => {
+    toggledTo.current = view;
+    setCoachView(view);
+  };
+
+  // The settings pop-over closes with Escape (focus returns to its button) or a click elsewhere.
+  useEffect(() => {
+    if (!foldSettings || !settingsOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      setSettingsOpen(false);
+      settingsToggleRef.current?.focus();
+    };
+    const onDown = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (!settingsRef.current?.contains(t) && !settingsToggleRef.current?.contains(t)) setSettingsOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    document.addEventListener('mousedown', onDown);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.removeEventListener('mousedown', onDown);
+    };
+  }, [foldSettings, settingsOpen]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -153,39 +199,35 @@ export function DrillScreen({ params }: { params?: URLSearchParams }) {
   const freqs = deal ? deal.spot.hands[deal.hand] : undefined;
   const bands = useMemo(() => (deal && freqs ? preflopBands(deal.spot.actions, freqs) : []), [deal, freqs]);
 
-  return (
-    <section className="drill" aria-labelledby="drill-title">
-      <div className="screen-head">
-        <div>
-          <h1 id="drill-title">Preflop Drill</h1>
-          <p className="muted small">
-            Session: <strong data-testid="session-count">{session.hands}</strong> hands,{' '}
-            {session.hands - session.assisted ? Math.round((session.correct / (session.hands - session.assisted)) * 100) : 0}% correct
-            {session.assisted > 0 && <span data-testid="session-assisted"> · {session.assisted} with the range shown (not graded)</span>}
-          </p>
-        </div>
-        <label className="toggle">
-          <input type="checkbox" checked={prefs.fourColor} onChange={(e) => setPrefs({ fourColor: e.target.checked })} />
-          <span>Four-color deck</span>
-        </label>
+  const gradeIcon = answer ? (answer.result.grade === 'best' ? '✓' : answer.result.grade === 'acceptable' ? '≈' : '✕') : '';
+  // Stacked layout: result, range and spot info are all shown, one under the other.
+  const viewingInfo = fit && !!answer && prefs.drillInfo && coachView === 'info';
+
+  const goalStrip = goal && (
+    <div className={`goal-strip panel${goal.progress.done ? ' done' : ''}`} data-testid="goal-strip" aria-live="polite">
+      <div className="goal-text">
+        <strong>{goal.progress.done ? '✓ Goal reached: ' : 'Goal: '}</strong>
+        {goal.stage.title} <span className="muted">· {goal.progress.summary}</span>
       </div>
+      <div className="meter" role="progressbar" aria-label={`${goal.stage.title} progress`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(goal.progress.progress * 100)}>
+        <span className="meter-fill" style={{ transform: `scaleX(${goal.progress.progress})` }} />
+      </div>
+      <a className="btn btn-ghost" href={hrefFor('learn', { lesson: 'plan' })}>
+        Back to your plan
+      </a>
+    </div>
+  );
 
-      {goal && (
-        <div className={`goal-strip panel${goal.progress.done ? ' done' : ''}`} data-testid="goal-strip" aria-live="polite">
-          <div className="goal-text">
-            <strong>{goal.progress.done ? '✓ Goal reached: ' : 'Goal: '}</strong>
-            {goal.stage.title} <span className="muted">· {goal.progress.summary}</span>
-          </div>
-          <div className="meter" role="progressbar" aria-label={`${goal.stage.title} progress`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(goal.progress.progress * 100)}>
-            <span className="meter-fill" style={{ transform: `scaleX(${goal.progress.progress})` }} />
-          </div>
-          <a className="btn btn-ghost" href={hrefFor('learn', { lesson: 'plan' })}>
-            Back to your plan
-          </a>
-        </div>
-      )}
-
-      <div className="filters panel" role="group" aria-label="Drill filters">
+  const settings = (
+    <div
+      className={`panel drill-settings${foldSettings ? ' as-popover' : ''}`}
+      id="drill-settings"
+      ref={settingsRef}
+      hidden={foldSettings && !settingsOpen}
+      role={foldSettings ? 'region' : undefined}
+      aria-label={foldSettings ? 'Drill settings' : undefined}
+    >
+      <div className="filters" role="group" aria-label="Drill filters">
         <label className="field">
           Spot type
           <select
@@ -222,7 +264,7 @@ export function DrillScreen({ params }: { params?: URLSearchParams }) {
         </label>
       </div>
 
-      <div className="study-tools panel" role="group" aria-label="Study tools">
+      <div className="study-tools" role="group" aria-label="Study tools">
         <fieldset className="segmented" data-testid="range-mode">
           <legend>Show the range</legend>
           {DRILL_RANGE_MODES.map((m) => (
@@ -243,78 +285,192 @@ export function DrillScreen({ params }: { params?: URLSearchParams }) {
           <input type="checkbox" checked={prefs.drillInfo} onChange={(e) => setPrefs({ drillInfo: e.target.checked })} data-testid="spot-info-toggle" />
           <span>Spot info</span>
         </label>
-        {prefs.drillRange === 'always' && <p className="small muted study-note">Open book: answers made while the range is visible are saved separately and don’t count toward your accuracy.</p>}
+        <label className="toggle">
+          <input type="checkbox" checked={prefs.fourColor} onChange={(e) => setPrefs({ fourColor: e.target.checked })} />
+          <span>Four-color deck</span>
+        </label>
       </div>
+    </div>
+  );
 
-      {!deal ? (
+  let stage;
+  if (!deal) {
+    stage = (
+      <div className="drill-stage drill-empty">
+        {goalStrip}
         <div className="panel empty-state">
           <p>No spots match these filters (for example, the big blind never raises first in). Pick another position or spot type.</p>
         </div>
-      ) : (
-        <div className="drill-layout">
-          <div className="drill-table">
-            <PokerTable spot={deal.spot} cards={deal.cards} fourColor={prefs.fourColor} dealKey={dealNo} heroAction={answer?.action ?? null} />
-            <p className="situation" data-testid="situation">
-              {deal.spot.description}
-            </p>
-            <div className="action-row" role="group" aria-label="Your action">
-              {deal.spot.actions.map((a) => (
-                <button
-                  key={a}
-                  type="button"
-                  className={`btn action-btn action-${a}${answer?.action === a ? ' chosen' : ''}`}
-                  onClick={() => choose(a)}
-                  disabled={!!answer}
-                  data-testid={`action-${a}`}
-                  aria-keyshortcuts={SHORTCUTS[a].toUpperCase()}
-                >
-                  {actionButtonLabel(deal, a)}
-                </button>
-              ))}
-            </div>
-            {prefs.drillInfo && <SpotInfoPanel spot={deal.spot} hand={deal.hand} />}
-          </div>
-          <div className="drill-side">
-            <div className="drill-result" aria-live="polite">
-              {answer ? (
-                <div className="panel result-panel" data-testid="drill-result">
-                  <GradeBadge grade={answer.result.grade} animKey={dealNo} />
-                  <h2 className="result-hand">
-                    {deal.hand} <span className="muted">· {deal.spot.hero}</span>
-                  </h2>
-                  <FrequencyBar bands={bands} title={`${deal.hand} frequencies`} />
-                  <p className="explanation" data-testid="explanation">
-                    {answer.result.text}
-                  </p>
-                  <div className="result-actions">
-                    <button ref={nextRef} type="button" className="btn btn-primary" onClick={redeal} data-testid="next-hand">
-                      Next hand
-                    </button>
-                    <a className="btn btn-ghost" href={hrefFor('ranges', { spot: deal.spot.id, hand: deal.hand })} data-testid="view-range">
-                      View full range
-                    </a>
-                  </div>
-                </div>
+      </div>
+    );
+  } else {
+    const table = (
+      <div className="drill-table">
+        {goalStrip}
+        <div className="table-fit">
+          <PokerTable spot={deal.spot} cards={deal.cards} fourColor={prefs.fourColor} dealKey={dealNo} heroAction={answer?.action ?? null} />
+        </div>
+        <p className="situation" data-testid="situation">
+          {deal.spot.description}
+        </p>
+        <div className="action-row" role="group" aria-label="Your action">
+          {deal.spot.actions.map((a) => (
+            <button
+              key={a}
+              type="button"
+              className={`btn action-btn action-${a}${answer?.action === a ? ' chosen' : ''}`}
+              onClick={() => choose(a)}
+              disabled={!!answer}
+              data-testid={`action-${a}`}
+              aria-keyshortcuts={SHORTCUTS[a].toUpperCase()}
+            >
+              {actionButtonLabel(deal, a)}
+            </button>
+          ))}
+        </div>
+        <div className="drill-next">
+          {answer ? (
+            <>
+              <span className={`grade-chip grade-${answer.result.grade}`} aria-hidden="true">
+                {gradeIcon} {GRADE_LABELS[answer.result.grade]}
+              </span>
+              <button ref={nextRef} type="button" className="btn btn-primary next-btn" onClick={redeal} data-testid="next-hand" aria-keyshortcuts="N">
+                Next hand
+              </button>
+            </>
+          ) : (
+            <div className="drill-hint">
+              {rangeVisible ? (
+                <span className="small open-book-note">Open book: answers made with the range showing are saved separately, not graded.</span>
               ) : (
-                <div className={`panel hint-panel${rangeVisible ? ' with-range' : ''}`}>
-                  <p className="muted">
-                    Pick an action. Keyboard: <kbd>R</kbd> raise, <kbd>C</kbd> call, <kbd>F</kbd> fold, <kbd>N</kbd> next hand.
-                  </p>
-                  {showNudge && (
-                    <p className="nudge">
-                      <span className="muted">Not sure what these decisions mean?</span>{' '}
-                      <a className="btn" href={hrefFor('learn', { lesson: 'welcome' })} data-testid="course-nudge">
-                        Take the beginner course
-                      </a>
-                    </p>
-                  )}
-                </div>
+                <span className="muted small">
+                  Keyboard: <kbd>R</kbd> raise · <kbd>C</kbd> call · <kbd>F</kbd> fold · <kbd>N</kbd> next hand
+                </span>
               )}
             </div>
-            {rangeVisible && <StudyRangePanel key={dealNo} spot={deal.spot} hand={deal.hand} beforeAnswer={!answer} />}
-          </div>
+          )}
         </div>
-      )}
+      </div>
+    );
+
+    const range = prefs.drillRange !== 'off' && (
+      <div className="drill-range">
+        {rangeVisible ? <StudyRangePanel key={dealNo} spot={deal.spot} hand={deal.hand} beforeAnswer={!answer} /> : <RangePlaceholder />}
+      </div>
+    );
+
+    // The live region only ever holds the answer feedback, so the spot info is not read out on every deal.
+    const result = (
+      <div className="coach-live" aria-live="polite">
+        {answer && (
+          <div className="panel result-panel" data-testid="drill-result" hidden={viewingInfo}>
+            <div className="result-head">
+              <GradeBadge grade={answer.result.grade} animKey={dealNo} />
+              <h2 className="result-hand">
+                {deal.hand} <span className="muted">· {deal.spot.hero}</span>
+              </h2>
+            </div>
+            <FrequencyBar bands={bands} title={`${deal.hand} frequencies`} />
+            <p className="explanation" data-testid="explanation">
+              {answer.result.text}
+            </p>
+            <div className="result-actions">
+              <a className="btn btn-ghost" href={hrefFor('ranges', { spot: deal.spot.id, hand: deal.hand })} data-testid="view-range">
+                View full range
+              </a>
+              {fit && prefs.drillInfo && (
+                <button ref={showInfoRef} type="button" className="btn btn-ghost" onClick={() => toggleCoach('info')} data-testid="show-spot-info">
+                  Spot info
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+
+    const info = prefs.drillInfo ? (
+      <SpotInfoPanel
+        spot={deal.spot}
+        hand={deal.hand}
+        action={
+          viewingInfo ? (
+            <button ref={showResultRef} type="button" className="btn btn-ghost btn-compact" onClick={() => toggleCoach('result')} data-testid="show-result">
+              Back to result
+            </button>
+          ) : null
+        }
+      />
+    ) : (
+      <div className="panel hint-panel">
+        <h2>Your call</h2>
+        <p className="muted">Pick an action under the table. After you answer, this panel shows your grade, the chart’s frequencies for the hand and why.</p>
+      </div>
+    );
+
+    stage = fit ? (
+      <div className={`drill-stage${prefs.drillRange === 'off' ? ' no-range' : ''}`}>
+        {table}
+        {range}
+        <div className="drill-coach">
+          {result}
+          {(!answer || viewingInfo) && info}
+        </div>
+      </div>
+    ) : (
+      <div className="drill-stage">
+        {table}
+        {result}
+        {range}
+        {(prefs.drillInfo || !answer) && <div className="drill-coach">{info}</div>}
+      </div>
+    );
+  }
+
+  // The settings come first on desktop (a toolbar above the drill) and last on phones, in the DOM
+  // as on screen, so focus and reading order follow what is shown.
+  return (
+    <section className="drill" aria-labelledby="drill-title">
+      <div className="drill-head">
+        <h1 id="drill-title">Preflop Drill</h1>
+        <p className="muted small drill-session">
+          Session: <strong data-testid="session-count">{session.hands}</strong> hands,{' '}
+          {session.hands - session.assisted ? Math.round((session.correct / (session.hands - session.assisted)) * 100) : 0}% correct
+          {session.assisted > 0 && <span data-testid="session-assisted"> · {session.assisted} with the range shown (not graded)</span>}
+        </p>
+        {showNudge && (
+          <a className="btn btn-ghost course-nudge" href={hrefFor('learn', { lesson: 'welcome' })} data-testid="course-nudge">
+            New here? Take the beginner course
+          </a>
+        )}
+        {foldSettings && (
+          <button
+            ref={settingsToggleRef}
+            type="button"
+            className="btn btn-ghost settings-toggle"
+            aria-expanded={settingsOpen}
+            aria-controls="drill-settings"
+            onClick={() => setSettingsOpen((o) => !o)}
+          >
+            Settings <span className="muted small">· Range: {RANGE_MODE_LABELS[prefs.drillRange]}</span>
+          </button>
+        )}
+        {!fit && (
+          <button
+            type="button"
+            className="btn btn-ghost settings-jump"
+            onClick={() => {
+              settingsRef.current?.scrollIntoView?.({ block: 'start' });
+              settingsRef.current?.querySelector('select')?.focus({ preventScroll: true });
+            }}
+          >
+            Settings
+          </button>
+        )}
+      </div>
+      {fit && settings}
+      {stage}
+      {!fit && settings}
     </section>
   );
 }

@@ -6,7 +6,7 @@ export function TableLesson() {
     <>
       <p>
         A 6-max table has six seats. Their names describe where they sit relative to the <strong>button</strong> (the dealer
-        marker), which moves one seat clockwise every hand. So every player plays every seat in turn.
+        marker, drawn as the white <strong>D</strong> disc), which moves one seat clockwise every hand. So every player plays every seat in turn.
       </p>
       <SeatDiagram order="preflop" highlight={['SB', 'BB']} caption="Seats in the order they act before the flop. The two blinds (highlighted) post forced bets." />
       <h2>The blinds</h2>

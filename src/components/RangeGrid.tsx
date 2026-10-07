@@ -17,6 +17,8 @@ interface Props {
   compact?: boolean;
   /** Override the accessible label of a cell (default: frequencies and combos). */
   cellLabel?: (label: string, info: CellInfo) => string;
+  /** Faint guides along the selected hand's row and column, so it is easy to find (default on). */
+  guides?: boolean;
 }
 
 const fmt = (f: number) => `${Math.round(f * 1000) / 10}%`;
@@ -30,10 +32,14 @@ export function cellAriaLabel(label: string, info: CellInfo): string {
 /**
  * 13×13 hand grid (pairs on the diagonal, suited above, offsuit below). Each
  * cell shows proportional action bands. Cells are buttons with ARIA labels and
- * a roving tabindex (arrow keys move focus).
+ * a roving tabindex (arrow keys move focus). The selected hand is lifted with a
+ * brass ring, and its row and column carry faint guides.
  */
-export function RangeGrid({ getCell, selected, onSelect, onHover, label, compact = false, cellLabel }: Props) {
+export function RangeGrid({ getCell, selected, onSelect, onHover, label, compact = false, cellLabel, guides = true }: Props) {
   const [focusIdx, setFocusIdx] = useState(() => Math.max(0, HAND_CLASSES.findIndex((h) => h.label === selected)));
+  const selIdx = selected ? HAND_CLASSES.findIndex((h) => h.label === selected) : -1;
+  const selRow = selIdx >= 0 && guides ? Math.floor(selIdx / 13) : -1;
+  const selCol = selIdx >= 0 && guides ? selIdx % 13 : -1;
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const move = (e: KeyboardEvent<HTMLButtonElement>, idx: number) => {
@@ -53,13 +59,15 @@ export function RangeGrid({ getCell, selected, onSelect, onHover, label, compact
   };
 
   return (
-    <div className={`range-grid${compact ? ' compact' : ''}`} role="grid" aria-label={label} data-testid="range-grid">
+    <div className={`range-grid${compact ? ' compact' : ''}${selIdx >= 0 ? ' has-selection' : ''}`} role="grid" aria-label={label} data-testid="range-grid">
       {Array.from({ length: 13 }, (_, r) => (
         <div className="range-row" role="row" key={r}>
           {HAND_CLASSES.slice(r * 13, r * 13 + 13).map((h, c) => {
             const idx = r * 13 + c;
             const info = getCell(h.label);
             const visible = info.bands.filter((b) => b.freq > 0.0005);
+            const isSel = selected === h.label;
+            const guide = !isSel && (r === selRow || c === selCol) ? ' guide' : '';
             return (
               <div role="gridcell" key={h.label} className="range-gridcell">
                 <button
@@ -67,10 +75,10 @@ export function RangeGrid({ getCell, selected, onSelect, onHover, label, compact
                     refs.current[idx] = el;
                   }}
                   type="button"
-                  className={`range-cell kind-${h.kind}${info.dimmed ? ' dimmed' : ''}${selected === h.label ? ' selected' : ''}`}
+                  className={`range-cell kind-${h.kind}${info.dimmed ? ' dimmed' : ''}${isSel ? ' selected' : ''}${guide}`}
                   data-hand={h.label}
                   aria-label={(cellLabel ?? cellAriaLabel)(h.label, info)}
-                  aria-pressed={selected === h.label}
+                  aria-pressed={isSel}
                   tabIndex={idx === focusIdx ? 0 : -1}
                   onClick={() => {
                     setFocusIdx(idx);
