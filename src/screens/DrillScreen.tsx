@@ -13,7 +13,9 @@ import { explain, type Explanation } from '../lib/preflop/explain';
 import { isCorrect } from '../lib/preflop/grading';
 import { ALL_SPOTS } from '../lib/preflop/spots';
 import { ACTION_LABELS, isPosition, isSpotType, POSITIONS, SPOT_TYPE_NAMES, SPOT_TYPES, type Position, type PreflopAction, type SpotType } from '../lib/preflop/types';
-import { addRecord } from '../lib/stats/store';
+import { addRecord, loadStats } from '../lib/stats/store';
+import { getStage, stageProgress } from '../learn/plan';
+import { useCourseProgress } from '../learn/progress';
 
 interface Answer {
   action: PreflopAction;
@@ -48,6 +50,8 @@ export function DrillScreen({ params }: { params?: URLSearchParams }) {
   const [dealNo, setDealNo] = useState(1);
   const [answer, setAnswer] = useState<Answer | null>(null);
   const [session, setSession] = useState({ hands: 0, correct: 0, assisted: 0 });
+  const [statsVersion, setStatsVersion] = useState(0);
+  const [course] = useCourseProgress();
   // Deal number on which the range was visible before answering (open book), if any.
   const [peekedDeal, setPeekedDeal] = useState<number | null>(null);
   const [prefs, setPrefs] = usePrefs();
@@ -105,6 +109,7 @@ export function DrillScreen({ params }: { params?: URLSearchParams }) {
         grade: result.grade,
         ...(assisted ? { assisted: true } : {}),
       });
+      setStatsVersion((v) => v + 1);
     },
     [deal, answer, prefs.drillRange, peekedDeal, dealNo],
   );
@@ -134,6 +139,17 @@ export function DrillScreen({ params }: { params?: URLSearchParams }) {
   }, [deal, answer, choose, redeal]);
 
   const rangeVisible = !!deal && (prefs.drillRange === 'always' || (prefs.drillRange === 'after' && !!answer));
+  // Practice-plan goal (from links like #/drill?type=rfi&goal=open).
+  const goalStage = getStage(params?.get('goal'));
+  const goal = useMemo(() => {
+    if (!goalStage || !goalStage.filter) return null;
+    void statsVersion; // recompute after every answer
+    return { stage: goalStage, progress: stageProgress(goalStage, loadStats()) };
+  }, [goalStage, statsVersion]);
+  const showNudge = useMemo(() => {
+    void statsVersion;
+    return course.completed.length === 0 && course.last === null && loadStats().records.length === 0;
+  }, [course, statsVersion]);
   const freqs = deal ? deal.spot.hands[deal.hand] : undefined;
   const bands = useMemo(() => (deal && freqs ? preflopBands(deal.spot.actions, freqs) : []), [deal, freqs]);
 
@@ -153,6 +169,21 @@ export function DrillScreen({ params }: { params?: URLSearchParams }) {
           <span>Four-color deck</span>
         </label>
       </div>
+
+      {goal && (
+        <div className={`goal-strip panel${goal.progress.done ? ' done' : ''}`} data-testid="goal-strip" aria-live="polite">
+          <div className="goal-text">
+            <strong>{goal.progress.done ? '✓ Goal reached: ' : 'Goal: '}</strong>
+            {goal.stage.title} <span className="muted">· {goal.progress.summary}</span>
+          </div>
+          <div className="meter" role="progressbar" aria-label={`${goal.stage.title} progress`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(goal.progress.progress * 100)}>
+            <span className="meter-fill" style={{ transform: `scaleX(${goal.progress.progress})` }} />
+          </div>
+          <a className="btn btn-ghost" href={hrefFor('learn', { lesson: 'plan' })}>
+            Back to your plan
+          </a>
+        </div>
+      )}
 
       <div className="filters panel" role="group" aria-label="Drill filters">
         <label className="field">
@@ -269,6 +300,14 @@ export function DrillScreen({ params }: { params?: URLSearchParams }) {
                   <p className="muted">
                     Pick an action. Keyboard: <kbd>R</kbd> raise, <kbd>C</kbd> call, <kbd>F</kbd> fold, <kbd>N</kbd> next hand.
                   </p>
+                  {showNudge && (
+                    <p className="nudge">
+                      <span className="muted">Not sure what these decisions mean?</span>{' '}
+                      <a className="btn" href={hrefFor('learn', { lesson: 'welcome' })} data-testid="course-nudge">
+                        Take the beginner course
+                      </a>
+                    </p>
+                  )}
                 </div>
               )}
             </div>

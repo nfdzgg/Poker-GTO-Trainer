@@ -137,7 +137,8 @@ kbd {
   background: var(--accent);
   border-color: var(--accent-strong);
 }
-.seat-hero .seat-pos {
+.seat-hero .seat-pos,
+.seat-hero .seat-note {
   color: var(--text-on-accent);
 }
 .seat-bet {

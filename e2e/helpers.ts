@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test';
 
 export const SCREENS = [
   { name: 'home', hash: '#/' },
+  { name: 'learn', hash: '#/learn' },
   { name: 'drill', hash: '#/drill?seed=2024' },
   { name: 'ranges', hash: '#/ranges?spot=vsopen-BTN-vs-CO' },
   { name: 'stats', hash: '#/stats' },

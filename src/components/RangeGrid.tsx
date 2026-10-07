@@ -15,6 +15,8 @@ interface Props {
   onHover?: (label: string | null) => void;
   label: string; // accessible name for the grid
   compact?: boolean;
+  /** Override the accessible label of a cell (default: frequencies and combos). */
+  cellLabel?: (label: string, info: CellInfo) => string;
 }
 
 const fmt = (f: number) => `${Math.round(f * 1000) / 10}%`;
@@ -30,7 +32,7 @@ export function cellAriaLabel(label: string, info: CellInfo): string {
  * cell shows proportional action bands. Cells are buttons with ARIA labels and
  * a roving tabindex (arrow keys move focus).
  */
-export function RangeGrid({ getCell, selected, onSelect, onHover, label, compact = false }: Props) {
+export function RangeGrid({ getCell, selected, onSelect, onHover, label, compact = false, cellLabel }: Props) {
   const [focusIdx, setFocusIdx] = useState(() => Math.max(0, HAND_CLASSES.findIndex((h) => h.label === selected)));
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -67,7 +69,7 @@ export function RangeGrid({ getCell, selected, onSelect, onHover, label, compact
                   type="button"
                   className={`range-cell kind-${h.kind}${info.dimmed ? ' dimmed' : ''}${selected === h.label ? ' selected' : ''}`}
                   data-hand={h.label}
-                  aria-label={cellAriaLabel(h.label, info)}
+                  aria-label={(cellLabel ?? cellAriaLabel)(h.label, info)}
                   aria-pressed={selected === h.label}
                   tabIndex={idx === focusIdx ? 0 : -1}
                   onClick={() => {

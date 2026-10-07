@@ -2,7 +2,7 @@ import { act, render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { App } from '../../App';
 
-const ROUTES = ['#/', '#/drill?seed=3', '#/ranges', '#/stats', '#/about'];
+const ROUTES = ['#/', '#/learn', '#/learn?lesson=hands', '#/learn?lesson=plan', '#/drill?seed=3', '#/ranges', '#/stats', '#/about'];
 
 describe('keyboard accessibility', () => {
   it('UI-06 every interactive control on every screen is keyboard reachable', async () => {

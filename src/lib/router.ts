@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export type RouteName = 'home' | 'drill' | 'ranges' | 'stats' | 'analyzer' | 'about';
+export type RouteName = 'home' | 'learn' | 'drill' | 'ranges' | 'stats' | 'analyzer' | 'about';
 
 export interface Route {
   name: RouteName;
@@ -10,6 +10,7 @@ export interface Route {
 const ROUTES: Record<string, RouteName> = {
   '': 'home',
   '/': 'home',
+  '/learn': 'learn',
   '/drill': 'drill',
   '/ranges': 'ranges',
   '/stats': 'stats',
