@@ -123,6 +123,6 @@ Drill "Show the range: Off / After I answer / Always" setting (default After I a
 
 ### M9 — 2026-10-07 — beginner course and practice plan
 
-Learn tab with 10 lessons (Start here + 9 lessons, ~50 min) and 33 quiz questions (multiple choice plus a tap-the-hand grid question; chart-dependent answers computed from the data), lesson completion and progress in `pgt.course.v1`, a seven-stage practice plan measured on graded answers, goal-tracking drill links with a live goal strip, Home "Start / Continue the course" button, a course nudge for brand-new drill users, and an adversarial content review whose 24 confirmed findings were fixed. New IDs P1-LEARN-01..04 and E2E-07.
+Learn tab with 10 lessons (Start here + 9 lessons, ~50 min) and 37 quiz questions (36 multiple choice plus a tap-the-hand grid question; chart-dependent answers computed from the data), lesson completion and progress in `pgt.course.v1`, a seven-stage practice plan measured on graded answers, goal-tracking drill links with a live goal strip, Home "Start / Continue the course" button, a course nudge for brand-new drill users, and an adversarial content review whose 24 confirmed findings were fixed. New IDs P1-LEARN-01..04 and E2E-07.
 
 `VERIFY SUMMARY: required 52/52, stretch 2/2, skipped 0`
