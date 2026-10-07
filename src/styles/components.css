@@ -1350,8 +1350,9 @@ kbd {
     line-height: 1.32;
   }
 }
-/* Short desktop windows (e.g. a 1366x768 laptop with the browser's toolbars): the footer steps
-   aside on this screen and the side panel narrows, so the drill keeps its room. */
+/* Short desktop windows (e.g. a 1366x768 laptop with the browser's toolbars): the settings fold
+   into a pop-over under the title row and the footer steps aside on this screen, so the drill keeps
+   its height. */
 @media (min-width: 1200px) and (min-height: 580px) and (max-height: 679px) {
   .route-drill .footer {
     display: none;
@@ -1359,15 +1360,46 @@ kbd {
   .route-drill .main {
     padding-block: var(--space-2);
   }
-  .drill-stage {
-    grid-template-columns: minmax(0, 1fr) auto minmax(300px, min(400px, 25vw));
+  .drill {
+    position: relative;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+      'head'
+      'stage';
+    row-gap: var(--space-3);
+  }
+  .drill-head {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-4);
+    max-width: none;
+  }
+  .course-nudge {
+    min-height: 32px;
+    margin-top: 0;
+  }
+  .settings-toggle {
+    margin-left: auto;
+  }
+  .drill-settings.as-popover {
+    grid-area: auto;
+    position: absolute;
+    top: calc(var(--tap-min) + var(--space-2));
+    right: 0;
+    z-index: 20;
+    max-width: 100%;
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface-1);
+    border-color: var(--line-strong);
+    box-shadow: 0 18px 44px var(--shadow-color);
   }
 }
 /* Narrower desktop windows: the title sits on its own line above the settings, and the side panel
    keeps a readable width. */
 @media (min-width: 1024px) and (max-width: 1199px) and (min-height: 700px) {
   .drill-stage {
-    grid-template-columns: minmax(0, 1fr) auto minmax(320px, 34vw);
+    grid-template-columns: minmax(0, 1fr) auto minmax(320px, min(360px, 34vw));
   }
   .drill {
     grid-template-columns: minmax(0, 1fr);
@@ -1410,7 +1442,7 @@ kbd {
 
 /* Short windows: the legend and the hand detail move beside the grid so the grid can be taller
    (the side panel is narrower here, so the table keeps a comfortable width). */
-@container drill-stage (height < 480px) and (width >= 1100px) {
+@container drill-stage (height < 480px) and (width >= 1350px) {
   .drill-range {
     --grid-side: clamp(180px, min(100cqh - 76px, 26cqw), 470px);
   }

@@ -6,7 +6,7 @@ import { GradeBadge } from '../components/GradeBadge';
 import { heroBetAfter, PokerTable } from '../components/PokerTable';
 import { createRng, randomSeed } from '../lib/rng';
 import { hrefFor } from '../lib/router';
-import { DRILL_FIT_QUERY, useMediaQuery } from '../lib/media';
+import { DRILL_FIT_QUERY, DRILL_SHORT_QUERY, useMediaQuery } from '../lib/media';
 import { DRILL_RANGE_MODES, usePrefs, type DrillRangeMode } from '../lib/prefs';
 import { preflopBands } from '../lib/preflop/colors';
 import { dealHand, type DealtHand, type DrillFilters } from '../lib/preflop/drill';
@@ -58,6 +58,10 @@ export function DrillScreen({ params }: { params?: URLSearchParams }) {
   const [prefs, setPrefs] = usePrefs();
   // One-screen desktop layout (columns) or the stacked phone/tablet layout.
   const fit = useMediaQuery(DRILL_FIT_QUERY);
+  // Short desktop windows fold the settings into a pop-over opened from the title row.
+  const foldSettings = useMediaQuery(DRILL_SHORT_QUERY) && fit;
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const settingsToggleRef = useRef<HTMLButtonElement>(null);
   // One-screen layout only: after answering, the side column shows the result and the spot info is one click away.
   const [coachView, setCoachView] = useState<'result' | 'info'>('result');
   const nextRef = useRef<HTMLButtonElement>(null);
@@ -140,6 +144,26 @@ export function DrillScreen({ params }: { params?: URLSearchParams }) {
     setCoachView(view);
   };
 
+  // The settings pop-over closes with Escape (focus returns to its button) or a click elsewhere.
+  useEffect(() => {
+    if (!foldSettings || !settingsOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      setSettingsOpen(false);
+      settingsToggleRef.current?.focus();
+    };
+    const onDown = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (!settingsRef.current?.contains(t) && !settingsToggleRef.current?.contains(t)) setSettingsOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    document.addEventListener('mousedown', onDown);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.removeEventListener('mousedown', onDown);
+    };
+  }, [foldSettings, settingsOpen]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement || e.metaKey || e.ctrlKey || e.altKey) return;
@@ -195,7 +219,14 @@ export function DrillScreen({ params }: { params?: URLSearchParams }) {
   );
 
   const settings = (
-    <div className="panel drill-settings" ref={settingsRef}>
+    <div
+      className={`panel drill-settings${foldSettings ? ' as-popover' : ''}`}
+      id="drill-settings"
+      ref={settingsRef}
+      hidden={foldSettings && !settingsOpen}
+      role={foldSettings ? 'region' : undefined}
+      aria-label={foldSettings ? 'Drill settings' : undefined}
+    >
       <div className="filters" role="group" aria-label="Drill filters">
         <label className="field">
           Spot type
@@ -411,6 +442,18 @@ export function DrillScreen({ params }: { params?: URLSearchParams }) {
           <a className="btn btn-ghost course-nudge" href={hrefFor('learn', { lesson: 'welcome' })} data-testid="course-nudge">
             New here? Take the beginner course
           </a>
+        )}
+        {foldSettings && (
+          <button
+            ref={settingsToggleRef}
+            type="button"
+            className="btn btn-ghost settings-toggle"
+            aria-expanded={settingsOpen}
+            aria-controls="drill-settings"
+            onClick={() => setSettingsOpen((o) => !o)}
+          >
+            Settings <span className="muted small">· Range: {RANGE_MODE_LABELS[prefs.drillRange]}</span>
+          </button>
         )}
         {!fit && (
           <button

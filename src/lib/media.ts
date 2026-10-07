@@ -6,6 +6,13 @@ import { useEffect, useState } from 'react';
  */
 export const DRILL_FIT_QUERY = '(min-width: 1200px) and (min-height: 580px), (min-width: 1024px) and (min-height: 700px)';
 
+/**
+ * Short desktop windows inside the one-screen layout (e.g. a 1366x768 laptop with the browser's
+ * toolbars): the drill settings fold into a pop-over so the drill keeps its height. Also verbatim in
+ * src/styles/components.css.
+ */
+export const DRILL_SHORT_QUERY = '(min-width: 1200px) and (min-height: 580px) and (max-height: 679px)';
+
 function matches(query: string): boolean {
   return typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia(query).matches;
 }
