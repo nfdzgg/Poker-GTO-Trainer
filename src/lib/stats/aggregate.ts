@@ -2,6 +2,16 @@ import { isCorrect } from '../preflop/grading';
 import { POSITIONS, SPOT_TYPES, type Position, type SpotType } from '../preflop/types';
 import type { StatRecord } from './store';
 
+/** Records that count toward accuracy: answers given without the range visible. */
+export function gradedRecords(records: readonly StatRecord[]): StatRecord[] {
+  return records.filter((r) => !r.assisted);
+}
+
+/** Answers given with the range visible (open-book practice). */
+export function assistedRecords(records: readonly StatRecord[]): StatRecord[] {
+  return records.filter((r) => r.assisted === true);
+}
+
 export interface Tally {
   attempts: number;
   correct: number;

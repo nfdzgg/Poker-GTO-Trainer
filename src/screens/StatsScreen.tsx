@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { hrefFor } from '../lib/router';
 import { GRADE_LABELS } from '../lib/preflop/grading';
 import { POSITIONS, SPOT_TYPE_NAMES, SPOT_TYPES, ALL_SPOT_BUCKETS } from '../lib/preflop/bucket';
-import { accuracy, aggregate, biggestLeaks, bucketKey, LEAK_MIN_ATTEMPTS, type Tally } from '../lib/stats/aggregate';
+import { accuracy, aggregate, assistedRecords, biggestLeaks, bucketKey, gradedRecords, LEAK_MIN_ATTEMPTS, type Tally } from '../lib/stats/aggregate';
 import { clearStats, loadStats, type StatsFile } from '../lib/stats/store';
 
 const pctText = (t: Tally | undefined) => (t && t.attempts > 0 ? `${Math.round(accuracy(t) * 100)}%` : '—');
@@ -19,8 +19,11 @@ function TallyCell({ t }: { t: Tally | undefined }) {
 export function StatsScreen() {
   const [stats, setStats] = useState<StatsFile>(() => loadStats());
   const [confirming, setConfirming] = useState(false);
-  const agg = aggregate(stats.records);
-  const leaks = biggestLeaks(stats.records);
+  // Open-book answers (range visible before answering) are tracked but not graded.
+  const graded = gradedRecords(stats.records);
+  const assistedCount = assistedRecords(stats.records).length;
+  const agg = aggregate(graded);
+  const leaks = biggestLeaks(graded);
   const eligibleBuckets = Object.values(agg.byBucket).filter((t) => t.attempts >= LEAK_MIN_ATTEMPTS).length;
 
   return (
@@ -48,6 +51,13 @@ export function StatsScreen() {
         <div className="panel stat-card">
           <span className="stat-label">Best answers</span>
           <span className="stat-value">{agg.total.attempts ? `${Math.round((agg.total.best / agg.total.attempts) * 100)}%` : '—'}</span>
+        </div>
+        <div className="panel stat-card">
+          <span className="stat-label">Open-book practice</span>
+          <span className="stat-value" data-testid="assisted-hands">
+            {assistedCount}
+          </span>
+          <span className="muted small">hands answered with the range shown (not graded)</span>
         </div>
       </div>
 
@@ -209,12 +219,12 @@ export function StatsScreen() {
       <div className="panel danger-zone">
         <h2>Reset</h2>
         {!confirming ? (
-          <button type="button" className="btn btn-danger" onClick={() => setConfirming(true)} data-testid="reset-stats" disabled={agg.total.attempts === 0 && stats.postflop.length === 0}>
+          <button type="button" className="btn btn-danger" onClick={() => setConfirming(true)} data-testid="reset-stats" disabled={stats.records.length === 0 && stats.postflop.length === 0}>
             Reset stats…
           </button>
         ) : (
           <div role="alertdialog" aria-labelledby="reset-q" className="confirm">
-            <p id="reset-q">Delete all {agg.total.attempts + stats.postflop.length} saved answers (preflop and postflop)? This cannot be undone.</p>
+            <p id="reset-q">Delete all {stats.records.length + stats.postflop.length} saved answers (preflop and postflop)? This cannot be undone.</p>
             <div className="confirm-actions">
               <button
                 type="button"
