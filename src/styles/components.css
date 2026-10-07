@@ -60,6 +60,7 @@ kbd {
   width: 100%;
   max-width: 640px;
   margin: 0 auto;
+  container: poker-table / inline-size; /* seats and cards scale with the table, not the window */
 }
 .table-felt {
   position: relative;
@@ -212,6 +213,47 @@ kbd {
   gap: var(--space-1);
   perspective: 800px;
 }
+/* Dealer button: an off-white puck on the felt in front of the BTN seat. */
+.table-dealer {
+  position: absolute;
+  z-index: 1;
+  transform: translate(-50%, -50%);
+  line-height: 0;
+  filter: drop-shadow(0 2px 3px var(--shadow-color));
+}
+.dealer-svg {
+  display: block;
+}
+.dealer-svg text {
+  font-family: var(--font-sans);
+}
+@container poker-table (max-width: 560px) {
+  .hero-cards .playing-card {
+    width: 56px !important;
+    height: 78px !important;
+  }
+  .table-dealer .dealer-svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+@container poker-table (max-width: 440px) {
+  .seat {
+    min-width: 44px;
+    padding: 2px var(--space-1);
+  }
+  .seat-note {
+    font-size: 10px;
+  }
+  .hero-cards .playing-card {
+    width: 50px !important;
+    height: 70px !important;
+  }
+  .table-dealer .dealer-svg {
+    width: 20px;
+    height: 20px;
+  }
+}
 
 /* ---------- Playing cards ---------- */
 .playing-card {
@@ -274,12 +316,123 @@ kbd {
   }
 }
 
-/* ---------- Drill ---------- */
-.drill-layout {
+/* ---------- Drill ----------
+ * Phones and tablets (default): one column, hand and actions first, settings last.
+ * Desktop windows (1200x640 and up, or 1024x700 and up): everything fits one screen (see the end of this file). */
+.drill {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.drill-head {
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-  gap: var(--space-5);
-  align-items: start;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--space-3);
+}
+.drill-head h1,
+.drill-session {
+  grid-column: 1;
+  margin: 0;
+}
+.settings-jump {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+.course-nudge {
+  grid-column: 1 / -1;
+  justify-self: start;
+  margin-top: var(--space-2);
+}
+.drill-settings {
+  order: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-6);
+  padding: var(--space-3) var(--space-4);
+}
+.drill-settings .filters,
+.drill-settings .study-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: 0;
+}
+.drill-settings .field {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  flex: 0 1 auto;
+}
+.drill-settings .field select {
+  min-width: 150px;
+}
+.drill .goal-strip {
+  margin: 0;
+}
+.drill-stage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.drill-table {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.table-fit {
+  display: grid;
+  place-items: center;
+}
+.drill-table .situation {
+  margin: 0;
+}
+.drill-next {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2) var(--space-3);
+  min-height: var(--tap-min);
+}
+.drill-hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2) var(--space-4);
+}
+.next-btn {
+  min-width: 200px;
+}
+.grade-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  border: 2px solid currentColor;
+  background: var(--surface-1);
+  font-weight: 800;
+}
+.drill-range,
+.drill-coach {
+  min-width: 0;
+}
+.drill-coach.coach-result {
+  order: 1;
+}
+.drill-range {
+  order: 2;
+}
+.drill-coach.coach-info {
+  order: 3;
 }
 .action-row {
   display: flex;
@@ -422,6 +575,7 @@ kbd {
   width: 100%;
   max-width: 620px;
   user-select: none;
+  container-type: inline-size; /* cell labels scale with the grid, not the window */
 }
 .range-row {
   display: grid;
@@ -442,6 +596,7 @@ kbd {
   overflow: hidden;
   background: var(--surface-1);
   cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out);
 }
 .range-bands {
   position: absolute;
@@ -457,7 +612,7 @@ kbd {
   inset: 0;
   display: grid;
   place-items: center;
-  font-size: clamp(7px, 1.9vw, 12px);
+  font-size: clamp(6px, 3cqw, 12px);
   font-weight: 700;
   color: var(--text-strong);
   text-shadow: 0 1px 2px var(--shadow-color);
@@ -466,14 +621,37 @@ kbd {
 .range-cell.dimmed {
   opacity: 0.35;
 }
+/* The hand the grid is about (dealt hand, picked hand): lifted, ringed in brass, and easy to find. */
 .range-cell.selected {
-  outline: 2px solid var(--accent-strong);
-  outline-offset: -2px;
+  z-index: 2;
+  opacity: 1;
+  border-radius: 4px;
+  transform: scale(1.18);
+  box-shadow:
+    0 0 0 2px var(--felt-950),
+    0 0 0 4px var(--accent-strong),
+    0 6px 16px var(--shadow-color);
+}
+.range-cell.selected .range-cell-label {
+  font-weight: 800;
+  text-shadow:
+    0 0 3px var(--felt-950),
+    0 1px 2px var(--felt-950);
+}
+/* Faint brass guides along the selected hand's row and column. */
+.range-cell.guide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+  opacity: 0.5;
+  pointer-events: none;
 }
 .range-cell:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: -3px;
-  z-index: 1;
+  z-index: 3;
 }
 .viewer-layout {
   display: grid;
@@ -596,18 +774,6 @@ kbd {
 }
 
 /* ---------- Drill study mode ---------- */
-.study-tools {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3) var(--space-5);
-  padding: var(--space-3) var(--space-4);
-  margin: calc(-1 * var(--space-3)) 0 var(--space-5);
-}
-.study-note {
-  flex: 1 1 100%;
-  margin: 0;
-}
 .segmented {
   display: flex;
   flex-wrap: wrap;
@@ -659,28 +825,25 @@ kbd {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
-.drill-side {
-  display: grid;
-  gap: var(--space-4);
-  min-width: 0;
-}
-.study-range {
-  display: grid;
-  gap: var(--space-3);
-}
-.study-range h2 {
-  font-size: var(--fs-lg);
-  margin: 0;
-}
-.study-range p {
-  margin: 0;
-}
+.panel-head,
 .study-head {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
+}
+.panel-head h2,
+.study-head h2 {
+  font-size: var(--fs-lg);
+  margin: 0;
+}
+.study-range {
+  display: grid;
+  gap: var(--space-2);
+}
+.study-range p {
+  margin: 0;
 }
 .study-badge {
   font-size: var(--fs-xs);
@@ -696,18 +859,111 @@ kbd {
   border-color: var(--accent);
   color: var(--accent-strong);
 }
+.study-head h2 {
+  min-width: 0;
+  flex: 1 1 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.open-book-note {
+  color: var(--accent-strong);
+}
+/* "Your hand" key: the same brass ring as the highlighted grid cell. */
+.hand-key {
+  display: inline-block;
+  margin: 0 2px;
+  padding: 0 5px;
+  border-radius: 4px;
+  font-weight: 800;
+  color: var(--text-strong);
+  box-shadow:
+    0 0 0 1px var(--felt-950),
+    0 0 0 3px var(--accent-strong);
+}
+.study-grid {
+  padding: 4px; /* room for the lifted, ringed cell at the grid edge */
+}
+.study-range .legend {
+  margin-top: 0;
+  font-size: var(--fs-xs);
+}
+.study-detail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px var(--space-2);
+  padding-left: var(--space-2);
+  border-left: 3px solid var(--line-strong);
+}
+.study-detail.is-hand {
+  border-left-color: var(--accent-strong);
+}
 .study-detail h3 {
   margin: 0;
-  font-size: var(--fs-lg);
+  font-size: var(--fs-md);
+}
+.study-detail h3 .hand-key {
+  margin-left: 3px;
+}
+.freq-inline {
+  flex: 1 1 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px var(--space-3);
+  margin: 0;
+  font-size: var(--fs-sm);
+}
+.freq-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.freq-chip dt {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+}
+.freq-chip dd {
+  margin: 0;
+  font-weight: 700;
+  color: var(--text-strong);
+  font-variant-numeric: tabular-nums;
+}
+.range-placeholder {
+  display: none; /* only the one-screen layout keeps a place for the range */
+}
+.placeholder-grid {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  padding: var(--space-5);
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-1);
+  background-image:
+    linear-gradient(to right, var(--felt-950) 2px, transparent 2px),
+    linear-gradient(to bottom, var(--felt-950) 2px, transparent 2px);
+  background-size: calc(100% / 13) calc(100% / 13);
+  text-align: center;
+}
+.placeholder-grid p {
+  margin: 0;
+  max-width: 24ch;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--surface-glass);
+  border: 1px solid var(--line);
+}
+.result-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
 }
 .spot-info {
-  margin-top: var(--space-4);
   display: grid;
   gap: var(--space-3);
-}
-.spot-info h2 {
-  font-size: var(--fs-lg);
-  margin: 0;
 }
 .facts {
   display: grid;
@@ -716,55 +972,49 @@ kbd {
 }
 .fact {
   display: grid;
-  grid-template-columns: minmax(110px, 0.4fr) minmax(0, 1fr);
+  grid-template-columns: 92px minmax(0, 1fr);
   gap: var(--space-3);
-  padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--line);
   font-size: var(--fs-sm);
+  line-height: 1.4;
 }
 .fact dt {
+  padding-top: 2px;
   color: var(--text-muted);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 .fact dd {
   margin: 0;
   color: var(--text-strong);
 }
+.fact-main {
+  font-weight: 700;
+}
+.fact-sub {
+  display: block;
+  color: var(--text);
+}
 .spot-tip {
   margin: 0;
   font-size: var(--fs-sm);
-  padding: var(--space-3);
+  line-height: 1.4;
+  padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-md);
   background: var(--accent-soft);
   color: var(--text-strong);
 }
+.hint-panel h2 {
+  font-size: var(--fs-lg);
+}
+.hint-panel p {
+  margin: 0;
+}
 
 @media (max-width: 900px) {
-  .drill-layout,
   .viewer-layout {
     grid-template-columns: minmax(0, 1fr);
-  }
-  /* One column on small screens: hand and actions, then the answer, the range, and the spot info last. */
-  .drill-layout {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-  }
-  .drill-table,
-  .drill-side {
-    display: contents;
-  }
-  .drill-layout .situation {
-    margin: 0;
-  }
-  .drill-layout .drill-result {
-    order: 2;
-  }
-  .drill-layout .study-range {
-    order: 3;
-  }
-  .drill-layout .spot-info {
-    order: 4;
-    margin-top: 0;
   }
 }
 @media (max-width: 720px) {
@@ -775,33 +1025,388 @@ kbd {
     gap: var(--space-3);
     padding: var(--space-3);
   }
-  .seat {
-    min-width: 44px;
-    padding: 2px var(--space-1);
-  }
-  .seat-note {
-    font-size: 10px;
-  }
   .table-felt {
     aspect-ratio: 1.3 / 1;
   }
   .hero-cards {
     bottom: 15%;
   }
-  .hero-cards .playing-card {
-    width: 52px !important;
-    height: 73px !important;
-  }
   .action-btn {
     flex: 1 1 0;
     min-width: 0;
   }
-  /* keep the actions and the open-book grid on one screen */
-  .hint-panel.with-range {
-    display: none;
+  .drill-settings .filters,
+  .drill-settings .study-tools {
+    flex: 1 1 100%;
+  }
+  .drill-settings .field {
+    flex: 1 1 140px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .drill-settings .field select {
+    min-width: 0;
+  }
+  .drill-settings .segmented legend {
+    float: none;
+    margin: 0 0 var(--space-1);
   }
   .fact {
     grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+}
+
+/* ---------- Drill: one screen on desktop ----------
+ * The app shell becomes exactly one viewport tall on the drill route, and the drill fills it:
+ * a two-row toolbar, then the table, the range and the side panel side by side. The table and
+ * the grid size themselves from the space that is left, so nothing scrolls. */
+@media (min-width: 1200px) and (min-height: 640px), (min-width: 1024px) and (min-height: 700px) {
+  .app.route-drill {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+  }
+  .route-drill .main {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-width: 1480px;
+    padding: var(--space-3) var(--space-5);
+  }
+  .route-drill .screen {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .route-drill .screen[data-anim='entering'] {
+    transform: none; /* fade only: a slide would push the page past the window for a moment */
+  }
+  .route-drill .footer {
+    padding: var(--space-1) var(--space-5);
+    font-size: var(--fs-xs);
+  }
+  .route-drill .footer a {
+    min-height: 0;
+  }
+  .drill {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+      'head settings'
+      'stage stage';
+    gap: var(--space-3) var(--space-5);
+  }
+  .drill-head {
+    grid-area: head;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 2px;
+    max-width: 300px;
+  }
+  .drill-head h1 {
+    font-size: var(--fs-xl);
+  }
+  .settings-jump {
+    display: none;
+  }
+  .drill-settings {
+    grid-area: settings;
+    order: 0;
+    column-gap: var(--space-5);
+    row-gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+  }
+  /* the practice-plan goal sits above the table, which gives up the height it needs */
+  .drill-table .goal-strip {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'text link'
+      'meter meter';
+    gap: var(--space-1) var(--space-3);
+    padding: var(--space-1) var(--space-3);
+  }
+  .drill-table .goal-text {
+    grid-area: text;
+  }
+  .drill-table .goal-strip .meter {
+    grid-area: meter;
+  }
+  .drill-table .goal-strip .btn {
+    grid-area: link;
+    min-height: 36px;
+  }
+  .drill-stage {
+    grid-area: stage;
+    min-height: 0;
+    container: drill-stage / size;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(300px, min(460px, 30vw));
+    gap: var(--space-4);
+  }
+  .drill-stage.no-range {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, min(480px, 36vw));
+  }
+  .drill-stage > .empty-state {
+    grid-column: 1 / -1;
+    align-self: start;
+  }
+  .drill-table {
+    min-height: 0;
+    gap: var(--space-2);
+  }
+  .table-fit {
+    flex: 1 1 0;
+    min-height: 0;
+    container: table-fit / size;
+    place-items: end center; /* the table sits right above the hand's description and the actions */
+  }
+  .table-fit .poker-table {
+    width: min(100cqw, 100cqh * 1.7857);
+    max-width: 680px;
+  }
+  .drill-table .situation {
+    display: grid;
+    place-items: center;
+    min-height: 3em; /* two lines, so a short description does not resize the table */
+  }
+  /* same height before and after answering, so the table never changes size mid-hand */
+  .drill-next {
+    flex-wrap: nowrap;
+    height: var(--tap-min);
+    min-height: 0;
+  }
+  .drill-hint {
+    font-size: var(--fs-xs);
+    line-height: 1.35;
+    text-align: center;
+  }
+  .drill-hint .small {
+    font-size: inherit;
+  }
+  .drill-hint kbd {
+    padding: 0 4px;
+  }
+  .course-nudge {
+    min-height: 32px;
+    margin-top: var(--space-1);
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--fs-sm);
+  }
+  .drill-range,
+  .drill-coach {
+    order: 0;
+    min-height: 0;
+    overflow-y: auto; /* fallback only: the grid and panels are sized to fit */
+  }
+  .drill-range {
+    display: flex;
+    flex-direction: column;
+    /* preferred side of the 13x13 grid: the height left after the panel's header, legend and hand detail */
+    --grid-side: clamp(160px, min(100cqh - 180px, 30cqw), 470px);
+  }
+  /* The panel never grows past its column: if the legend or the detail wrap onto extra lines,
+     the grid gives up the difference (it is a size container and stays square). */
+  .drill-range .study-range {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    max-height: 100%;
+    width: calc(var(--grid-side) + 8px + 2 * var(--space-4));
+    padding: var(--space-3) var(--space-4);
+  }
+  .drill-range .study-range > * {
+    flex-shrink: 0;
+  }
+  .drill-range .study-range > .study-grid {
+    flex: 0 1 calc(var(--grid-side) + 8px);
+    min-height: 0;
+    container-type: size;
+    display: grid;
+    justify-items: center;
+    align-items: start;
+  }
+  .drill-range .study-grid > .range-grid,
+  .drill-range .placeholder-grid {
+    width: min(100cqw, 100cqh);
+  }
+  .drill-range .study-head h2 {
+    font-size: var(--fs-md);
+  }
+  .drill-range .range-placeholder {
+    display: flex;
+  }
+  .drill-coach .panel {
+    padding: var(--space-3) var(--space-4);
+  }
+  .drill-coach .result-panel {
+    gap: var(--space-2);
+  }
+  .result-panel .grade-badge {
+    font-size: var(--fs-md);
+  }
+  .result-panel .grade-icon {
+    width: 26px;
+    height: 26px;
+  }
+  .result-panel .result-hand {
+    font-size: var(--fs-lg);
+  }
+  .result-panel .freq-bar-track {
+    height: 24px;
+  }
+  .result-panel .freq-bar-legend {
+    margin-top: var(--space-1);
+    font-size: var(--fs-xs);
+  }
+  .result-panel .explanation {
+    font-size: var(--fs-sm);
+    line-height: 1.45;
+  }
+  .grade-chip {
+    display: none; /* the result panel sits right beside the table */
+  }
+  .drill-table .action-row {
+    flex-wrap: nowrap;
+    gap: var(--space-2);
+  }
+  .drill-table .action-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 180px;
+    padding-inline: var(--space-2);
+  }
+  .drill-range .study-range .legend {
+    gap: 2px var(--space-3);
+  }
+  /* denser spot info, so it fits beside the table on laptop screens */
+  .drill-coach .spot-info {
+    gap: var(--space-2);
+  }
+  .drill-coach .panel-head h2 {
+    font-size: var(--fs-md);
+  }
+  .drill-coach .facts {
     gap: var(--space-1);
+  }
+  .drill-coach .fact {
+    grid-template-columns: 84px minmax(0, 1fr);
+    gap: var(--space-2);
+    line-height: 1.32;
+  }
+  .drill-coach .spot-tip {
+    line-height: 1.32;
+  }
+}
+/* Narrower desktop windows: the title sits on its own line above the settings, and the side panel
+   keeps a readable width. */
+@media (min-width: 1024px) and (max-width: 1199px) and (min-height: 700px) {
+  .drill-stage {
+    grid-template-columns: minmax(0, 1fr) auto minmax(320px, 34vw);
+  }
+  .drill {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas: 'head' 'settings' 'stage';
+    row-gap: var(--space-2);
+  }
+  .drill.has-goal {
+    grid-template-rows: auto auto auto minmax(0, 1fr);
+    grid-template-areas: 'head' 'settings' 'goal' 'stage';
+  }
+  .drill-head {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--space-4);
+    max-width: none;
+  }
+  .course-nudge {
+    min-height: 28px;
+    margin-top: 0;
+    padding-block: 0;
+  }
+  .drill-settings .field select {
+    min-width: 130px;
+  }
+}
+
+/* In a tall, narrow table column the felt takes the rounder phone shape, so the table fills the space. */
+@container table-fit (aspect-ratio < 1.55) {
+  .table-fit .poker-table {
+    width: min(100cqw, 100cqh * 1.3);
+  }
+  .table-fit .table-felt {
+    aspect-ratio: 1.3 / 1;
+  }
+  .table-fit .hero-cards {
+    bottom: 15%;
+  }
+}
+
+/* Short, wide windows: the legend and the hand detail move beside the grid so the grid can be taller. */
+@container drill-stage (height < 480px) and (width >= 1200px) {
+  .drill-range {
+    --grid-side: clamp(180px, min(100cqh - 76px, 30cqw), 470px);
+  }
+  .drill-range .study-range {
+    display: grid;
+    width: auto;
+    grid-template-columns: calc(var(--grid-side) + 8px) 120px;
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      'head head'
+      'grid legend'
+      'grid detail';
+    gap: var(--space-2) var(--space-3);
+    align-content: start;
+  }
+  .drill-range .study-head {
+    grid-area: head;
+  }
+  .drill-range .study-range > .study-grid {
+    grid-area: grid;
+    height: calc(var(--grid-side) + 8px);
+  }
+  .drill-range .study-range .legend {
+    grid-area: legend;
+  }
+  .drill-range .study-detail {
+    grid-area: detail;
+  }
+  .drill-range .study-range .legend {
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  .drill-range .study-detail {
+    align-self: start;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .drill-range .freq-inline {
+    flex-direction: column;
+  }
+}
+
+/* Narrow stages wrap the legend and the hand detail onto more lines: leave them more room. */
+@container drill-stage (width < 1150px) {
+  .drill-range {
+    --grid-side: clamp(180px, min(100cqh - 208px, 30cqw), 470px);
+  }
+}
+
+/* Very short windows: the side panel's text tightens a notch so it still fits beside the table. */
+@container drill-stage (height < 470px) {
+  .drill-coach .facts {
+    gap: 2px;
+  }
+  .drill-coach .spot-tip {
+    font-size: var(--fs-xs);
   }
 }

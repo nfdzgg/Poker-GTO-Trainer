@@ -1,6 +1,7 @@
 import type { CardId } from '../lib/poker/cards';
 import { POSITIONS, type Position, type PreflopAction, type SpotData } from '../lib/preflop/types';
 import { BetChips, ChipStack } from './Chip';
+import { DealerButton } from './DealerButton';
 import { PlayingCard } from './PlayingCard';
 
 type SeatStatus = 'hero' | 'folded' | 'waiting' | 'raised' | '3bet';
@@ -34,6 +35,20 @@ export function seatStates(spot: SpotData): Seat[] {
   });
 }
 
+/**
+ * Where the dealer button sits (percent of the felt) for each seat slot k, counted clockwise from
+ * the hero at the bottom. It lies on the felt in front of the BTN seat, clear of the seat box,
+ * the bet chips, the pot and the hero's cards.
+ */
+export const DEALER_SPOTS: readonly { x: number; y: number }[] = [
+  { x: 63, y: 91 }, // k=0: you are the button (just right of your seat, below your cards; your bet sits left)
+  { x: 23, y: 84 }, // k=1: bottom left
+  { x: 23, y: 17 }, // k=2: top left
+  { x: 62, y: 19 }, // k=3: top
+  { x: 77, y: 17 }, // k=4: top right
+  { x: 77, y: 84 }, // k=5: bottom right
+];
+
 /** Total hero commitment after taking `action` (bb). */
 export function heroBetAfter(spot: SpotData, action: PreflopAction): number {
   switch (action) {
@@ -62,6 +77,7 @@ export function PokerTable({ spot, cards, fourColor, dealKey, heroAction }: Prop
   const seats = seatStates(spot);
   const heroIdx = POSITIONS.indexOf(spot.hero);
   const heroBet = heroAction && heroAction !== 'fold' ? heroBetAfter(spot, heroAction) : 0;
+  const dealer = DEALER_SPOTS[(POSITIONS.indexOf('BTN') - heroIdx + 6) % 6]!;
   return (
     <div className="poker-table" data-testid="poker-table">
       <div className="table-felt">
@@ -86,7 +102,7 @@ export function PokerTable({ spot, cards, fourColor, dealKey, heroAction }: Prop
                 className={`seat seat-${s.status}`}
                 style={{ left: `${x}%`, top: `${y}%` }}
                 data-position={s.pos}
-                aria-label={`${s.pos}${isHero ? ' (you)' : ''}: ${s.note || 'waiting'}`}
+                aria-label={`${s.pos}${isHero ? ' (you)' : ''}${s.pos === 'BTN' ? ', dealer button' : ''}: ${s.note || 'waiting'}`}
               >
                 <span className="seat-pos">{s.pos}</span>
                 {!isHero && <span className="seat-note">{s.note || '…'}</span>}
@@ -105,6 +121,7 @@ export function PokerTable({ spot, cards, fourColor, dealKey, heroAction }: Prop
             </div>
           );
         })}
+        <DealerButton className="table-dealer" style={{ left: `${dealer.x}%`, top: `${dealer.y}%` }} />
       </div>
       <div className="hero-cards" aria-label="Your hand">
         <PlayingCard card={cards[0]} fourColor={fourColor} anim="deal" animKey={dealKey} width={68} />

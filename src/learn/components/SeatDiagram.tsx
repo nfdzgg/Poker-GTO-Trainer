@@ -1,3 +1,4 @@
+import { DealerButton } from '../../components/DealerButton';
 import { POSITION_NAMES, POSITIONS, type Position } from '../../lib/preflop/types';
 
 const POSTFLOP_ORDER: Position[] = ['SB', 'BB', 'UTG', 'HJ', 'CO', 'BTN'];
@@ -14,7 +15,7 @@ export function SeatDiagram({ order, highlight = [], caption }: Props) {
   const seq = order === 'postflop' ? POSTFLOP_ORDER : POSITIONS;
   return (
     <figure className="seat-diagram">
-      <div className="table-felt diagram-felt" role="img" aria-label={`${caption}. ${seq.map((p, i) => `${order ? `${i + 1}. ` : ''}${POSITION_NAMES[p]} (${p})`).join(', ')}`}>
+      <div className="table-felt diagram-felt" role="img" aria-label={`${caption}. ${seq.map((p, i) => `${order ? `${i + 1}. ` : ''}${POSITION_NAMES[p]} (${p})${p === 'BTN' ? ', with the dealer button' : ''}`).join(', ')}`}>
         <div className="table-rail" aria-hidden="true" />
         <div className="diagram-center" aria-hidden="true">
           {order === 'preflop' ? 'Preflop order' : order === 'postflop' ? 'Postflop order' : '6-max'}
@@ -33,6 +34,8 @@ export function SeatDiagram({ order, highlight = [], caption }: Props) {
             </div>
           );
         })}
+        {/* the dealer button sits on the felt in front of the BTN seat (bottom right) */}
+        <DealerButton className="table-dealer" style={{ left: '60%', top: '68%' }} />
       </div>
       <figcaption className="muted small">{caption}</figcaption>
     </figure>
