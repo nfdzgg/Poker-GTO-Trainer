@@ -213,29 +213,47 @@ kbd {
   gap: var(--space-1);
   perspective: 800px;
 }
-/* Dealer button: an off-white puck on the felt in front of the BTN seat. */
+/* The hero's cards scale with the felt (cq units of the poker-table container), so they never crowd
+   the pot on a small table. */
+.hero-cards .playing-card {
+  width: clamp(34px, 10.6cqw, 68px) !important;
+  height: clamp(48px, 14.84cqw, 95px) !important;
+}
+/* Dealer button: an off-white puck on the felt beside the BTN seat. It is placed at the seat's centre
+   and pushed off the seat box towards open felt: beside your own seat and the top seat (their bets
+   and your cards are elsewhere), below the top corner seats and above the bottom corner seats. */
 .table-dealer {
   position: absolute;
   z-index: 1;
-  transform: translate(-50%, -50%);
+  transform: translate(calc(-50% + var(--dealer-dx, 0px)), calc(-50% + var(--dealer-dy, 0px)));
   line-height: 0;
   filter: drop-shadow(0 2px 3px var(--shadow-color));
 }
 .dealer-svg {
   display: block;
+  width: clamp(18px, 4.1cqw, 26px);
+  height: clamp(18px, 4.1cqw, 26px);
 }
 .dealer-svg text {
   font-family: var(--font-sans);
 }
-@container poker-table (max-width: 560px) {
-  .hero-cards .playing-card {
-    width: 56px !important;
-    height: 78px !important;
-  }
-  .table-dealer .dealer-svg {
-    width: 22px;
-    height: 22px;
-  }
+.dealer-slot-0 {
+  --dealer-dx: 46px;
+  --dealer-dy: 4px;
+}
+.dealer-slot-1,
+.dealer-slot-5 {
+  --dealer-dy: -34px;
+}
+.dealer-slot-2,
+.dealer-slot-4 {
+  --dealer-dy: 34px;
+}
+.dealer-slot-3 {
+  --dealer-dx: 54px;
+}
+.dealer-diagram {
+  --dealer-dy: -36px;
 }
 @container poker-table (max-width: 440px) {
   .seat {
@@ -245,13 +263,19 @@ kbd {
   .seat-note {
     font-size: 10px;
   }
-  .hero-cards .playing-card {
-    width: 50px !important;
-    height: 70px !important;
+  .dealer-slot-0 {
+    --dealer-dx: 36px;
   }
-  .table-dealer .dealer-svg {
-    width: 20px;
-    height: 20px;
+  .dealer-slot-1,
+  .dealer-slot-5 {
+    --dealer-dy: -27px;
+  }
+  .dealer-slot-2,
+  .dealer-slot-4 {
+    --dealer-dy: 27px;
+  }
+  .dealer-slot-3 {
+    --dealer-dx: 42px;
   }
 }
 
@@ -318,7 +342,7 @@ kbd {
 
 /* ---------- Drill ----------
  * Phones and tablets (default): one column, hand and actions first, settings last.
- * Desktop windows (1200x640 and up, or 1024x700 and up): everything fits one screen (see the end of this file). */
+ * Desktop windows (1200x580 and up, or 1024x700 and up): everything fits one screen (see the end of this file). */
 .drill {
   display: flex;
   flex-direction: column;
@@ -345,7 +369,6 @@ kbd {
   margin-top: var(--space-2);
 }
 .drill-settings {
-  order: 5;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -422,17 +445,18 @@ kbd {
   font-weight: 800;
 }
 .drill-range,
-.drill-coach {
+.drill-coach,
+.coach-live {
   min-width: 0;
 }
-.drill-coach.coach-result {
-  order: 1;
-}
-.drill-range {
-  order: 2;
-}
-.drill-coach.coach-info {
-  order: 3;
+/* The answer's live region stays in the page (so screen readers announce what appears in it)
+   but takes no room while it is empty. */
+.coach-live:empty {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
 }
 .action-row {
   display: flex;
@@ -626,10 +650,10 @@ kbd {
   z-index: 2;
   opacity: 1;
   border-radius: 4px;
-  transform: scale(1.18);
+  transform: scale(1.12);
   box-shadow:
-    0 0 0 2px var(--felt-950),
-    0 0 0 4px var(--accent-strong),
+    0 0 0 1px var(--felt-950),
+    0 0 0 3.5px var(--accent-strong),
     0 6px 16px var(--shadow-color);
 }
 .range-cell.selected .range-cell-label {
@@ -862,9 +886,6 @@ kbd {
 .study-head h2 {
   min-width: 0;
   flex: 1 1 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .open-book-note {
   color: var(--accent-strong);
@@ -967,15 +988,14 @@ kbd {
 }
 .facts {
   display: grid;
-  gap: var(--space-2);
+  grid-template-columns: max-content minmax(0, 1fr); /* one label column, aligned across rows */
+  gap: var(--space-2) var(--space-3);
   margin: 0;
-}
-.fact {
-  display: grid;
-  grid-template-columns: 92px minmax(0, 1fr);
-  gap: var(--space-3);
   font-size: var(--fs-sm);
   line-height: 1.4;
+}
+.fact {
+  display: contents;
 }
 .fact dt {
   padding-top: 2px;
@@ -984,6 +1004,7 @@ kbd {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  white-space: nowrap;
 }
 .fact dd {
   margin: 0;
@@ -1031,6 +1052,13 @@ kbd {
   .hero-cards {
     bottom: 15%;
   }
+  .hero-cards .playing-card {
+    width: clamp(40px, 14cqw, 68px) !important;
+    height: clamp(56px, 19.6cqw, 95px) !important;
+  }
+  .dealer-diagram {
+    --dealer-dy: -28px;
+  }
   .action-btn {
     flex: 1 1 0;
     min-width: 0;
@@ -1051,9 +1079,12 @@ kbd {
     float: none;
     margin: 0 0 var(--space-1);
   }
-  .fact {
+  .facts {
     grid-template-columns: minmax(0, 1fr);
-    gap: 0;
+    row-gap: 0;
+  }
+  .fact dd {
+    margin-bottom: var(--space-2);
   }
 }
 
@@ -1061,7 +1092,7 @@ kbd {
  * The app shell becomes exactly one viewport tall on the drill route, and the drill fills it:
  * a two-row toolbar, then the table, the range and the side panel side by side. The table and
  * the grid size themselves from the space that is left, so nothing scrolls. */
-@media (min-width: 1200px) and (min-height: 640px), (min-width: 1024px) and (min-height: 700px) {
+@media (min-width: 1200px) and (min-height: 580px), (min-width: 1024px) and (min-height: 700px) {
   .app.route-drill {
     height: 100vh;
     height: 100dvh;
@@ -1073,6 +1104,7 @@ kbd {
     min-height: 0;
     max-width: 1480px;
     padding: var(--space-3) var(--space-5);
+    overflow: hidden; /* the page itself never scrolls here; the columns below have their own fallback */
   }
   .route-drill .screen {
     flex: 1 1 auto;
@@ -1127,8 +1159,8 @@ kbd {
   .drill-table .goal-strip {
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
-      'text link'
-      'meter meter';
+      'text text'
+      'meter link';
     gap: var(--space-1) var(--space-3);
     padding: var(--space-1) var(--space-3);
   }
@@ -1153,13 +1185,14 @@ kbd {
   .drill-stage.no-range {
     grid-template-columns: minmax(0, 1fr) minmax(320px, min(480px, 36vw));
   }
-  .drill-stage > .empty-state {
-    grid-column: 1 / -1;
-    align-self: start;
+  .drill-stage.drill-empty {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
   }
   .drill-table {
     min-height: 0;
     gap: var(--space-2);
+    container: drill-table / inline-size;
   }
   .table-fit {
     flex: 1 1 0;
@@ -1199,11 +1232,23 @@ kbd {
     padding: var(--space-1) var(--space-3);
     font-size: var(--fs-sm);
   }
+  /* Fallback only (the grid and panels are sized to fit). The padding, taken back with negative
+     margins from the gaps around the column, leaves room for the panels' drop shadows. */
   .drill-range,
   .drill-coach {
-    order: 0;
     min-height: 0;
-    overflow-y: auto; /* fallback only: the grid and panels are sized to fit */
+    overflow-y: auto;
+    padding: var(--space-3) var(--space-4);
+    margin: calc(-1 * var(--space-3)) calc(-1 * var(--space-4));
+  }
+  .drill-coach {
+    display: flex;
+    flex-direction: column;
+  }
+  .drill-coach .btn-compact {
+    min-height: 0;
+    padding: 2px var(--space-3);
+    font-size: var(--fs-sm);
   }
   .drill-range {
     display: flex;
@@ -1238,6 +1283,11 @@ kbd {
   }
   .drill-range .study-head h2 {
     font-size: var(--fs-md);
+  }
+  /* room for three lines whichever hand is hovered, so hovering never resizes the grid */
+  .drill-range .study-detail {
+    min-height: 66px;
+    align-content: flex-start;
   }
   .drill-range .range-placeholder {
     display: flex;
@@ -1293,15 +1343,24 @@ kbd {
     font-size: var(--fs-md);
   }
   .drill-coach .facts {
-    gap: var(--space-1);
-  }
-  .drill-coach .fact {
-    grid-template-columns: 84px minmax(0, 1fr);
-    gap: var(--space-2);
+    row-gap: var(--space-1);
     line-height: 1.32;
   }
   .drill-coach .spot-tip {
     line-height: 1.32;
+  }
+}
+/* Short desktop windows (e.g. a 1366x768 laptop with the browser's toolbars): the footer steps
+   aside on this screen and the side panel narrows, so the drill keeps its room. */
+@media (min-width: 1200px) and (min-height: 580px) and (max-height: 679px) {
+  .route-drill .footer {
+    display: none;
+  }
+  .route-drill .main {
+    padding-block: var(--space-2);
+  }
+  .drill-stage {
+    grid-template-columns: minmax(0, 1fr) auto minmax(300px, min(400px, 25vw));
   }
 }
 /* Narrower desktop windows: the title sits on its own line above the settings, and the side panel
@@ -1314,11 +1373,6 @@ kbd {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto minmax(0, 1fr);
     grid-template-areas: 'head' 'settings' 'stage';
-    row-gap: var(--space-2);
-  }
-  .drill.has-goal {
-    grid-template-rows: auto auto auto minmax(0, 1fr);
-    grid-template-areas: 'head' 'settings' 'goal' 'stage';
   }
   .drill-head {
     flex-direction: row;
@@ -1348,17 +1402,22 @@ kbd {
   .table-fit .hero-cards {
     bottom: 15%;
   }
+  .table-fit .hero-cards .playing-card {
+    width: clamp(40px, 14cqw, 68px) !important;
+    height: clamp(56px, 19.6cqw, 95px) !important;
+  }
 }
 
-/* Short, wide windows: the legend and the hand detail move beside the grid so the grid can be taller. */
-@container drill-stage (height < 480px) and (width >= 1200px) {
+/* Short windows: the legend and the hand detail move beside the grid so the grid can be taller
+   (the side panel is narrower here, so the table keeps a comfortable width). */
+@container drill-stage (height < 480px) and (width >= 1100px) {
   .drill-range {
-    --grid-side: clamp(180px, min(100cqh - 76px, 30cqw), 470px);
+    --grid-side: clamp(180px, min(100cqh - 76px, 26cqw), 470px);
   }
   .drill-range .study-range {
     display: grid;
     width: auto;
-    grid-template-columns: calc(var(--grid-side) + 8px) 120px;
+    grid-template-columns: calc(var(--grid-side) + 8px) 140px;
     grid-template-rows: auto auto 1fr;
     grid-template-areas:
       'head head'
@@ -1392,6 +1451,9 @@ kbd {
   .drill-range .freq-inline {
     flex-direction: column;
   }
+  .drill-range .study-detail h3 {
+    white-space: nowrap;
+  }
 }
 
 /* Narrow stages wrap the legend and the hand detail onto more lines: leave them more room. */
@@ -1401,12 +1463,62 @@ kbd {
   }
 }
 
-/* Very short windows: the side panel's text tightens a notch so it still fits beside the table. */
+/* Short or narrow stages: long explanations take a smaller size so the result fits beside the table. */
+@container drill-stage (height < 520px) or (width < 1150px) {
+  .result-panel .explanation {
+    font-size: var(--fs-xs);
+    line-height: 1.4;
+  }
+}
+
+/* Very short windows: everything tightens a notch so the table keeps its size and the side panel
+   still fits beside it. */
 @container drill-stage (height < 470px) {
   .drill-coach .facts {
-    gap: 2px;
+    row-gap: 2px;
   }
   .drill-coach .spot-tip {
     font-size: var(--fs-xs);
+  }
+  .drill-coach .result-panel {
+    gap: 6px;
+  }
+  .result-panel .freq-bar-track {
+    height: 20px;
+  }
+  .result-panel .freq-bar-legend {
+    margin-top: 2px;
+  }
+  .drill-table .situation {
+    font-size: var(--fs-sm);
+  }
+  /* the goal strip shrinks to one line: goal, meter, link */
+  .drill-table .goal-strip {
+    grid-template-columns: minmax(0, 1fr) 80px auto;
+    grid-template-areas: 'text meter link';
+    align-items: center;
+  }
+  .drill-table .goal-text {
+    font-size: var(--fs-xs);
+    line-height: 1.3;
+  }
+  .drill-table .goal-strip .btn {
+    min-height: 28px;
+    padding: 0 var(--space-2);
+    font-size: var(--fs-xs);
+  }
+}
+
+/* A narrow table column keeps the goal strip to two lines: the goal, then the meter and the link. */
+@container drill-table (width < 480px) {
+  .drill-table .goal-strip {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'text text'
+      'meter link';
+  }
+  .drill-table .goal-text {
+    font-size: var(--fs-xs);
+    line-height: 1.3;
   }
 }

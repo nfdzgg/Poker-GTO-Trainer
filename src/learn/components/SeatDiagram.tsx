@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { DealerButton } from '../../components/DealerButton';
 import { POSITION_NAMES, POSITIONS, type Position } from '../../lib/preflop/types';
 
@@ -27,15 +28,17 @@ export function SeatDiagram({ order, highlight = [], caption }: Props) {
           const y = 50 + Math.sin(angle) * 38;
           const n = order ? seq.indexOf(p) + 1 : null;
           return (
-            <div key={p} className={`seat diagram-seat${highlight.includes(p) ? ' seat-hero' : ''}`} style={{ left: `${x}%`, top: `${y}%` }} aria-hidden="true">
-              {n !== null && <span className="seat-order">{n}</span>}
-              <span className="seat-pos">{p}</span>
-              <span className="seat-note">{POSITION_NAMES[p]}</span>
-            </div>
+            <Fragment key={p}>
+              {/* the dealer button sits on the felt just above the BTN seat (bottom right) */}
+              {p === 'BTN' && <DealerButton className="table-dealer dealer-diagram" style={{ left: `${x}%`, top: `${y}%` }} />}
+              <div className={`seat diagram-seat${highlight.includes(p) ? ' seat-hero' : ''}`} style={{ left: `${x}%`, top: `${y}%` }} aria-hidden="true">
+                {n !== null && <span className="seat-order">{n}</span>}
+                <span className="seat-pos">{p}</span>
+                <span className="seat-note">{POSITION_NAMES[p]}</span>
+              </div>
+            </Fragment>
           );
         })}
-        {/* the dealer button sits on the felt in front of the BTN seat (bottom right) */}
-        <DealerButton className="table-dealer" style={{ left: '60%', top: '68%' }} />
       </div>
       <figcaption className="muted small">{caption}</figcaption>
     </figure>
