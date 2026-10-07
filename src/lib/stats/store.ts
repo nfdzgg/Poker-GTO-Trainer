@@ -15,6 +15,8 @@ export interface StatRecord {
   hand: string;
   action: PreflopAction;
   grade: Grade;
+  /** True when the range for the spot was visible before answering (open-book practice). */
+  assisted?: boolean;
 }
 
 /** Postflop drill results are kept separately (stretch milestone M7). */
@@ -56,7 +58,8 @@ function isRecord(x: unknown): x is StatRecord {
     (r.villain === null || isPosition(r.villain as string)) &&
     typeof r.hand === 'string' &&
     typeof r.action === 'string' &&
-    GRADES.has(r.grade as string)
+    GRADES.has(r.grade as string) &&
+    (r.assisted === undefined || typeof r.assisted === 'boolean')
   );
 }
 

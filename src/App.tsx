@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { hrefFor, useHashRoute, type RouteName } from './lib/router';
 import { ScreenTransition } from './components/ScreenTransition';
 import { HomeScreen } from './screens/HomeScreen';
+import { LearnScreen } from './screens/LearnScreen';
 import { DrillScreen } from './screens/DrillScreen';
 import { RangeViewerScreen } from './screens/RangeViewerScreen';
 import { StatsScreen } from './screens/StatsScreen';
@@ -14,6 +15,7 @@ import { SOURCE_URL } from './lib/constants';
 
 const NAV: { name: RouteName; label: string }[] = [
   { name: 'home', label: 'Home' },
+  { name: 'learn', label: 'Learn' },
   { name: 'drill', label: 'Preflop Drill' },
   { name: 'ranges', label: 'Ranges' },
   { name: 'stats', label: 'Stats' },
@@ -26,6 +28,9 @@ export function App() {
 
   let screen;
   switch (route.name) {
+    case 'learn':
+      screen = <LearnScreen params={route.params} />;
+      break;
     case 'drill':
       screen = <DrillScreen params={route.params} />;
       break;

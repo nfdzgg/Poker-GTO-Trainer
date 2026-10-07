@@ -3,18 +3,29 @@ import { PlayingCard } from '../components/PlayingCard';
 import { parseCard } from '../lib/poker/cards';
 import { usePrefs } from '../lib/prefs';
 import { hrefFor } from '../lib/router';
+import { getLesson, LESSONS } from '../learn/course';
+import { nextIncomplete, useCourseProgress } from '../learn/progress';
 
 const FAN = ['Ah', 'Kd', 'Qs', 'Jc', 'Th'].map((c) => parseCard(c)!);
 
 const TILES = [
-  { route: 'drill', title: 'Preflop Drill', body: 'Get dealt a spot and a hand, pick an action, and get graded against the chart.' },
-  { route: 'ranges', title: 'Range Viewer', body: 'Browse all 35 six-max spots as color-coded 13×13 grids with exact mixes.' },
-  { route: 'stats', title: 'Stats', body: 'Accuracy by position and spot, plus your biggest leaks with one-click drills.' },
-  { route: 'analyzer', title: 'Postflop Analyzer', body: 'Build a spot and solve it in your browser with a real CFR solver.' },
+  { route: 'learn', title: 'Learn the basics', body: 'A short beginner course: seats, hands, prices and every preflop decision, with quizzes.' },
+  { route: 'drill', title: 'Drill', body: 'Get dealt a spot and a hand, pick an action, and get graded against the chart.' },
+  { route: 'ranges', title: 'Review the ranges', body: 'Browse all 35 six-max spots as color-coded 13×13 grids with exact mixes.' },
+  { route: 'stats', title: 'Fix your leaks', body: 'Accuracy by position and spot, plus your biggest leaks with one-click drills.' },
+  { route: 'analyzer', title: 'Go postflop', body: 'Build a spot and solve it in your browser with a real CFR solver.' },
 ] as const;
 
 export function HomeScreen() {
   const [prefs] = usePrefs();
+  const [course] = useCourseProgress();
+  const started = course.completed.length > 0 || course.last !== null;
+  const next = getLesson(nextIncomplete(course));
+  const cta = !started
+    ? { href: hrefFor('learn', { lesson: LESSONS[0]!.id }), label: 'Start the beginner course' }
+    : next
+      ? { href: hrefFor('learn', { lesson: next.id }), label: next.number === 0 ? `Continue the course: ${next.title}` : `Continue the course: Lesson ${next.number}` }
+      : { href: hrefFor('learn', { lesson: 'plan' }), label: 'Open your practice plan' };
   return (
     <section className="home" aria-labelledby="home-title">
       <div className="hero-wrap">
@@ -26,13 +37,16 @@ export function HomeScreen() {
           charts, then take any spot postflop and solve it right in your browser.
         </p>
         <div className="hero-actions">
-          <a className="btn btn-primary" href={hrefFor('drill')}>
-            Start drilling
+          <a className="btn btn-primary" href={cta.href} data-testid="home-cta">
+            {cta.label}
           </a>
-          <a className="btn btn-ghost" href={hrefFor('analyzer')}>
-            Open analyzer
+          <a className="btn btn-ghost" href={hrefFor('drill')}>
+            Jump into the drill
           </a>
         </div>
+        <p className="small muted hero-note">
+          {started ? `${course.completed.length} of ${LESSONS.length} lessons complete.` : 'New to poker strategy? Start with the course; it takes under an hour.'}
+        </p>
       </div>
       <div className="hero-art" aria-hidden="true">
         <div className="card-fan">
@@ -49,8 +63,11 @@ export function HomeScreen() {
       </div>
       </div>
       <div className="tiles">
-        {TILES.map((t) => (
+        {TILES.map((t, i) => (
           <a key={t.route} className="tile panel" href={hrefFor(t.route)}>
+            <span className="tile-step" aria-hidden="true">
+              {i + 1}
+            </span>
             <h2>{t.title}</h2>
             <p className="muted">{t.body}</p>
           </a>
